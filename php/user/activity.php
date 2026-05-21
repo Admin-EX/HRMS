@@ -582,6 +582,73 @@ $stmt_pending->close();
     </div>
 </div>
 
+<div class="modal-overlay" id="announcementsModal">
+    <div class="modal">
+        <span class="close-btn" id="closeAnnouncementsModal">&times;</span>
+        <h3>All Announcements</h3>
+
+        <?php
+        $all_announcements_modal = [];
+        $ann_res_modal = mysqli_query($connection,
+            "SELECT id, title, content, announcement_date AS date, priority, status, 'announcement' AS source_type
+             FROM announcements
+             WHERE status = 'Active' AND announcement_date <= NOW()
+               AND (end_date IS NULL OR end_date >= NOW())
+             ORDER BY announcement_date DESC");
+        if ($ann_res_modal && mysqli_num_rows($ann_res_modal) > 0)
+            while ($r = mysqli_fetch_assoc($ann_res_modal)) $all_announcements_modal[] = $r;
+
+        $stmt_ann_modal = mysqli_prepare($connection,
+            "SELECT id, title, content, date, 'Medium' AS priority, 'Active' AS status, 'activity' AS source_type
+             FROM activity_log
+             WHERE employee_number = ?
+               AND title IN ('Calendar','Required Document','Offset Document','Leave Document')
+             ORDER BY date DESC");
+        mysqli_stmt_bind_param($stmt_ann_modal, "s", $employee_id);
+        mysqli_stmt_execute($stmt_ann_modal);
+        $act_modal_result = mysqli_stmt_get_result($stmt_ann_modal);
+        if ($act_modal_result && mysqli_num_rows($act_modal_result) > 0)
+            while ($r = mysqli_fetch_assoc($act_modal_result)) $all_announcements_modal[] = $r;
+        mysqli_stmt_close($stmt_ann_modal);
+
+        usort($all_announcements_modal, fn($a, $b) => strtotime($b['date']) - strtotime($a['date']));
+        ?>
+
+        <?php if (count($all_announcements_modal) > 0): ?>
+            <?php foreach ($all_announcements_modal as $ann):
+                $is_important = isset($ann['priority']) && strtolower($ann['priority']) == 'high';
+                $source_badge = $ann['source_type'] == 'activity' ? '<span class="source-badge activity">Personal</span>' : '';
+                $is_cal = strpos(strtolower($ann['title']), 'meeting') !== false
+                       || strpos(strtolower($ann['title']), 'event') !== false
+                       || strpos(strtolower($ann['title']), 'deadline') !== false;
+            ?>
+                <div class="<?= $is_important ? 'announcement important' : 'announcement' ?>">
+                    <strong><?= htmlspecialchars($ann['title']) ?> <?= $source_badge ?></strong>
+                    <small><?= timeAgo($ann['date']) ?></small>
+                    <p><?= nl2br(htmlspecialchars($ann['content'])) ?></p>
+                    <?php if ($is_cal && $ann['source_type'] == 'announcement'): ?>
+                        <div class="announcement-actions">
+                            <button class="add-to-calendar-btn"
+                                data-announcement-id="<?= $ann['id'] ?>"
+                                data-title="<?= htmlspecialchars($ann['title'], ENT_QUOTES) ?>"
+                                data-content="<?= htmlspecialchars($ann['content'], ENT_QUOTES) ?>"
+                                data-date="<?= $ann['date'] ?>">
+                                <i class="fas fa-calendar-plus"></i> Add to Calendar
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="announcement">
+                <strong>No Announcements</strong>
+                <small>Today</small>
+                <p>There are no announcements available right now.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <!-- Main Layout -->
 <div class="main-container">
     <div class="sidebar">
@@ -969,6 +1036,55 @@ document.querySelectorAll('.tracker-view').forEach(btn => {
 docsModalBtn.addEventListener('click', () => {
     docsModal.style.display = 'flex'
 })
+
+const viewAllDocs = document.getElementById('viewAllDocs');
+const viewAllDocs2 = document.getElementById('viewAllDocs2');
+const docsModalFull = document.getElementById('docsModalFull');
+const closeDocsModal = document.getElementById('closeDocsModal');
+const viewAllAnnouncements = document.getElementById('viewAllAnnouncements');
+const announcementsModal = document.getElementById('announcementsModal');
+const closeAnnouncementsModal = document.getElementById('closeAnnouncementsModal');
+
+if (viewAllDocs) {
+    viewAllDocs.addEventListener('click', function () {
+        if (docsModalFull) docsModalFull.classList.add('active');
+    });
+}
+if (viewAllDocs2) {
+    viewAllDocs2.addEventListener('click', function () {
+        if (docsModalFull) docsModalFull.classList.add('active');
+    });
+}
+if (closeDocsModal && docsModalFull) {
+    closeDocsModal.addEventListener('click', function () {
+        docsModalFull.classList.remove('active');
+    });
+}
+if (docsModalFull) {
+    docsModalFull.addEventListener('click', function (e) {
+        if (e.target === docsModalFull) {
+            docsModalFull.classList.remove('active');
+        }
+    });
+}
+
+if (viewAllAnnouncements) {
+    viewAllAnnouncements.addEventListener('click', function () {
+        if (announcementsModal) announcementsModal.classList.add('active');
+    });
+}
+if (closeAnnouncementsModal && announcementsModal) {
+    closeAnnouncementsModal.addEventListener('click', function () {
+        announcementsModal.classList.remove('active');
+    });
+}
+if (announcementsModal) {
+    announcementsModal.addEventListener('click', function (e) {
+        if (e.target === announcementsModal) {
+            announcementsModal.classList.remove('active');
+        }
+    });
+}
 
 // Wire tracker Upload/Re-upload buttons to existing upload modal
 document.querySelectorAll('.tracker-btn.upload-btn').forEach(btn => {

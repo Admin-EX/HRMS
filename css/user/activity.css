@@ -683,11 +683,36 @@
       display: flex;
       gap: 25px; /* SAME GAP as Dashboard */
       flex-wrap: wrap;
+      align-items: stretch;
     }
 
     .left, .right {
+      display: flex;
+      flex-direction: column;
       flex: 1;
       min-width: 300px;
+    }
+
+    /* Constrain announcements column and make scrollable when many announcements */
+    .left {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px; /* room for scrollbar */
+      position: relative;
+    }
+
+    .left h3 {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+      margin: 0 0 15px;
+      padding-bottom: 10px;
+    }
+
+    .right {
+      max-height: 520px;
+      overflow: hidden;
     }
 
     .announcement {
@@ -717,6 +742,12 @@
       font-size: 13px;
       line-height: 1.4;
     }
+
+    /* scrollbar styling for modern browsers */
+    .left::-webkit-scrollbar, .announcement-list::-webkit-scrollbar { width: 10px; }
+    .left::-webkit-scrollbar-track, .announcement-list::-webkit-scrollbar-track { background: transparent; }
+    .left::-webkit-scrollbar-thumb, .announcement-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 6px; }
+    .left::-webkit-scrollbar-thumb:hover, .announcement-list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.12); }
 
     .announcement-actions {
       margin-top: 10px;

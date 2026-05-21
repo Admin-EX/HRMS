@@ -246,6 +246,53 @@
             border-bottom: 1px solid #eee;
         }
 
+        /* Panel actions (e.g., Add button) */
+        .panel-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Ensure action buttons inside panel headers show label text */
+        .panel-actions .action-btn {
+            width: auto;
+            height: auto;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Announcement item actions (Edit / Delete) */
+        .announcement-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 12px;
+            flex-shrink: 0;
+            min-width: 120px;
+            align-items: stretch;
+        }
+
+        .announcement-actions .action-btn {
+            width: 100%;
+            height: auto;
+            padding: 8px 10px;
+            font-size: 13px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .announcement-actions { flex-direction: row; min-width: 0; }
+            .announcement-actions .action-btn { flex: 1; }
+        }
+
         .panel-header h3 {
             margin: 0;
             color: #333;
@@ -266,7 +313,16 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
+            max-height: 360px; /* limit height and allow scroll when many items */
+            overflow-y: auto;
+            padding-right: 8px; /* avoid scrollbar overlaying content */
         }
+
+        /* Custom scrollbar for modern browsers */
+        .announcement-list::-webkit-scrollbar { width: 10px; }
+        .announcement-list::-webkit-scrollbar-track { background: transparent; }
+        .announcement-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 6px; }
+        .announcement-list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.12); }
 
         .announcement-item {
             padding: 18px;
@@ -832,6 +888,43 @@
             overflow-y: auto;
         }
 
+        /* Modal form row styles */
+        .modal-body .form-row {
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-body .form-row label {
+            font-size: 14px;
+            color: #283246;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .modal-body .form-row input[type="text"],
+        .modal-body .form-row input[type="date"],
+        .modal-body .form-row select,
+        .modal-body .form-row textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e6e9ee;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2c3e50;
+            background: #fff;
+            box-shadow: none;
+            box-sizing: border-box;
+        }
+
+        .modal-body .form-row textarea { min-height: 110px; resize: vertical; }
+
+        .modal-body .form-row .field-sample {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
         .modal-actions {
             display: flex;
             justify-content: flex-end;
@@ -839,6 +932,18 @@
             padding: 20px 30px;
             border-top: 1px solid #eee;
             background: #f8f9fa;
+        }
+
+        /* Ensure modal action buttons can show text and don't stay as small squares */
+        .modal-actions .action-btn {
+            width: auto;
+            height: auto;
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* EMPLOYEE LIST STYLES */
@@ -1372,7 +1477,9 @@
    TOOLTIP FOR ACTION BUTTONS
    ============================================ */
 
-.action-btn::after {
+/* Only show tooltip when a title attribute is present to
+   avoid rendering an empty dark dot for icon-only buttons. */
+.action-btn[title]::after {
     content: attr(title);
     position: absolute;
     bottom: -30px;
@@ -1391,7 +1498,7 @@
     z-index: 10;
 }
 
-.action-btn:hover::after {
+.action-btn[title]:hover::after {
     opacity: 1;
     visibility: visible;
     bottom: -35px;

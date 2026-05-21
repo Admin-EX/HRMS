@@ -156,18 +156,31 @@ try {
                         <h3>Latest Announcements</h3>
                         <small>Visible to employee accounts</small>
                     </div>
+                    <div class="panel-actions">
+                        <button id="addAnnouncementBtn" class="action-btn view-btn" title="Add announcement">
+                            <i class="fas fa-plus"></i> Add Announcement
+                        </button>
+                    </div>
                 </div>
                 <div class="announcement-list">
                     <?php if (count($announcements) > 0): ?>
                         <?php foreach ($announcements as $ann): ?>
                             <?php $important = in_array(strtolower($ann['priority']), ['high', 'urgent']); ?>
-                            <div class="announcement-item<?= $important ? ' important' : '' ?>">
-                                <h4><?= htmlspecialchars($ann['title']) ?></h4>
-                                <div class="announcement-meta">
-                                    <span><?= date('M d, Y', strtotime($ann['announcement_date'])) ?></span>
-                                    <span><?= ucfirst(htmlspecialchars($ann['priority'] ?: 'Normal')) ?> Priority</span>
+                            <div class="announcement-item<?= $important ? ' important' : '' ?>" data-id="<?= (int)$ann['id'] ?>">
+                                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                                    <div style="flex:1">
+                                        <h4 class="ann-title"><?= htmlspecialchars($ann['title']) ?></h4>
+                                        <div class="announcement-meta">
+                                            <span class="ann-date"><?= date('M d, Y', strtotime($ann['announcement_date'])) ?></span>
+                                            <span class="ann-priority"><?= ucfirst(htmlspecialchars($ann['priority'] ?: 'Normal')) ?> Priority</span>
+                                        </div>
+                                        <p class="ann-content"><?= nl2br(htmlspecialchars($ann['content'])) ?></p>
+                                    </div>
+                                    <div class="announcement-actions" style="margin-left:12px;display:flex;flex-direction:column;gap:8px;">
+                                        <button class="action-btn edit-ann-btn" data-id="<?= (int)$ann['id'] ?>"><i class="fas fa-edit"></i> Edit</button>
+                                        <button class="action-btn archive-btn del-ann-btn" data-id="<?= (int)$ann['id'] ?>"><i class="fas fa-trash"></i> Delete</button>
+                                    </div>
                                 </div>
-                                <p><?= nl2br(htmlspecialchars($ann['content'])) ?></p>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -688,6 +701,46 @@ if ($result && mysqli_num_rows($result) > 0) {
         </main>
     </div>
 
+
+    <div id="addAnnouncementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-bullhorn"></i>
+                    Add Announcement
+                </h3>
+                <button class="close-modal" id="closeAddAnnouncementModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addAnnouncementForm">
+                    <div class="form-row">
+                        <label>Title</label>
+                        <input type="text" name="title" id="announcementTitle" required />
+                    </div>
+                    <div class="form-row">
+                        <label>Date</label>
+                        <input type="date" name="announcement_date" id="announcementDate" value="<?php echo date('Y-m-d'); ?>" required />
+                    </div>
+                    <div class="form-row">
+                        <label>Priority</label>
+                        <select name="priority" id="announcementPriority">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Content</label>
+                        <textarea name="content" id="announcementContent" rows="5" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn view-btn" id="saveAnnouncementBtn"><i class="fas fa-save"></i> Save</button>
+                <button class="action-btn" id="cancelAnnouncementBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <div id="employeeModal" class="modal">
         <div class="modal-content">

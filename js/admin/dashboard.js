@@ -84,6 +84,58 @@ function updateAnalyticsBars(teachingAnalytics) {
     document.getElementById('totalTP').textContent = `${teachingAnalytics.total} employees`;
 }
 
+// Toast helper: creates a container and shows a toast message
+function showToast(message, type = 'info', duration = 3000) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        Object.assign(container.style, {
+            position: 'fixed',
+            right: '20px',
+            top: '20px',
+            zIndex: 99999,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            alignItems: 'flex-end'
+        });
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    const bg = type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#34495e';
+    Object.assign(toast.style, {
+        background: bg,
+        color: '#fff',
+        padding: '10px 14px',
+        borderRadius: '6px',
+        boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+        opacity: '0',
+        transform: 'translateY(-8px)',
+        transition: 'opacity 220ms ease, transform 220ms ease',
+        maxWidth: '360px',
+        fontSize: '14px'
+    });
+
+    container.appendChild(toast);
+
+    // animate in
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+
+    // remove after duration
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-8px)';
+        setTimeout(() => container.removeChild(toast), 300);
+    }, duration);
+}
+
 function formatSchools(schoolsData, category) {
     if (!schoolsData || !schoolsData[category] || schoolsData[category].length === 0) {
         return 'No data';
@@ -101,6 +153,14 @@ const modalTitle       = document.getElementById('modalTitle');
 const employeeList     = document.getElementById('employeeList');
 const employeeSearch   = document.getElementById('employeeSearch');
 const employeeCount    = document.getElementById('employeeCount');
+
+// Add Announcement modal elements
+const addAnnouncementBtn = document.getElementById('addAnnouncementBtn');
+const addAnnouncementModal = document.getElementById('addAnnouncementModal');
+const closeAddAnnouncementModal = document.getElementById('closeAddAnnouncementModal');
+const addAnnouncementForm = document.getElementById('addAnnouncementForm');
+const saveAnnouncementBtn = document.getElementById('saveAnnouncementBtn');
+const cancelAnnouncementBtn = document.getElementById('cancelAnnouncementBtn');
 
 let currentEmployees = [];
 
@@ -205,18 +265,10 @@ function viewLeaveRequest(employeeId) {
     fetch(`../../backendPHP/getLeaveRequest.php?id=${encodeURIComponent(employeeId)}`)
         .then(res => res.json())
         .then(req => {
-            if (!req) { alert('No leave request found.'); return; }
-            alert(
-                `Leave Request Details:\n\n` +
-                `Employee : ${req.name}\n` +
-                `Leave Type: ${req.leaveType}\n` +
-                `Duration  : ${req.duration}\n` +
-                `Dates     : ${req.startDate} to ${req.endDate}\n` +
-                `Status    : ${req.status}\n` +
-                `Reason    : ${req.reason}`
-            );
+            if (!req) { showToast('No leave request found', 'error'); return; }
+            showToast('Loaded leave request details', 'info');
         })
-        .catch(() => alert('Could not load leave request details.'));
+        .catch(() => { showToast('Could not load leave request details', 'error'); });
 }
 
 // ─── INITIALISE ───────────────────────────────────────────────────────────────
@@ -264,6 +316,145 @@ document.addEventListener('DOMContentLoaded', function () {
     employeeModal.addEventListener('click', e => {
         if (e.target === employeeModal) employeeModal.style.display = 'none';
     });
+    // Add Announcement modal handlers
+    if (addAnnouncementBtn && addAnnouncementModal) {
+        addAnnouncementBtn.addEventListener('click', function () {
+            addAnnouncementModal.style.display = 'flex';
+            // reset form
+            if (addAnnouncementForm) addAnnouncementForm.reset();
+        });
+    }
+    if (closeAddAnnouncementModal) closeAddAnnouncementModal.addEventListener('click', () => addAnnouncementModal.style.display = 'none');
+    if (cancelAnnouncementBtn) cancelAnnouncementBtn.addEventListener('click', (e) => { e.preventDefault(); addAnnouncementModal.style.display = 'none'; });
+    if (addAnnouncementModal) addAnnouncementModal.addEventListener('click', e => { if (e.target === addAnnouncementModal) addAnnouncementModal.style.display = 'none'; });
+
+    if (saveAnnouncementBtn && addAnnouncementForm) {
+        saveAnnouncementBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const formData = new FormData(addAnnouncementForm);
+            // Basic validation
+            if (!formData.get('title') || !formData.get('content')) {
+                showToast('Please provide title and content for the announcement.', 'error');
+                return;
+            }
+            // If form has data-edit-id attribute, perform update instead
+            const editId = addAnnouncementForm.dataset.editId;
+            const endpoint = editId ? '../../backendPHP/update_announcement.php' : '../../backendPHP/insert_announcement.php';
+            if (editId) formData.append('id', editId);
+            fetch(endpoint, { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const list = document.querySelector('.announcement-list');
+                        const ann = data.announcement;
+                        const important = (ann.priority || '').toLowerCase() === 'high' || (ann.priority || '').toLowerCase() === 'urgent';
+                        const itemHtml = buildAnnouncementHtml(ann, important);
+                        if (editId) {
+                            // replace existing element
+                            const existing = list.querySelector(`.announcement-item[data-id="${editId}"]`);
+                            if (existing) {
+                                existing.outerHTML = itemHtml;
+                            }
+                        } else {
+                            // prepend new
+                            list.insertAdjacentHTML('afterbegin', itemHtml);
+                        }
+                        // reset edit state
+                        delete addAnnouncementForm.dataset.editId;
+                        addAnnouncementForm.reset();
+                        addAnnouncementModal.style.display = 'none';
+                        showToast(data.message || 'Announcement saved', 'success');
+                    } else {
+                        showToast(data.message || 'Failed to save announcement', 'error');
+                    }
+                }).catch(err => { console.error(err); showToast('Error saving announcement', 'error'); });
+        });
+    }
+
+    // Delegate edit/delete button clicks inside announcement list
+    document.querySelector('.announcement-list')?.addEventListener('click', function (e) {
+        const editBtn = e.target.closest('.edit-ann-btn');
+        const delBtn = e.target.closest('.del-ann-btn');
+        if (editBtn) {
+            const id = editBtn.dataset.id;
+            openEditAnnouncement(id);
+            return;
+        }
+        if (delBtn) {
+            const id = delBtn.dataset.id;
+            if (!confirm('Delete this announcement?')) return;
+            fetch('../../backendPHP/delete_announcement.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${encodeURIComponent(id)}`
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    const el = document.querySelector(`.announcement-item[data-id="${id}"]`);
+                    if (el) el.remove();
+                    showToast(data.message || 'Announcement deleted', 'success');
+                } else {
+                    showToast(data.message || 'Failed to delete announcement', 'error');
+                }
+            }).catch(err => { console.error(err); showToast('Error deleting announcement', 'error'); });
+        }
+    });
+
+    function openEditAnnouncement(id) {
+        // fetch announcement details (could be available in DOM)
+        const el = document.querySelector(`.announcement-item[data-id="${id}"]`);
+        if (!el) { showToast('Announcement not found', 'error'); return; }
+        const title = el.querySelector('.ann-title')?.textContent || '';
+        const content = el.querySelector('.ann-content')?.textContent || '';
+        const dateText = el.querySelector('.ann-date')?.textContent || '';
+        const priorityText = el.querySelector('.ann-priority')?.textContent.replace(' Priority', '') || 'Normal';
+
+        // Attempt to parse dateText (format like "May 21, 2026") back to YYYY-MM-DD
+        let isoDate = '';
+        try {
+            const d = new Date(dateText);
+            if (!isNaN(d)) {
+                isoDate = d.toISOString().slice(0,10);
+            }
+        } catch (e) { isoDate = ''; }
+
+        // populate form
+        addAnnouncementForm.dataset.editId = id;
+        addAnnouncementForm.querySelector('#announcementTitle').value = title;
+        addAnnouncementForm.querySelector('#announcementContent').value = content.replace(/<br\/?\s*>/g, '\n');
+        if (isoDate) addAnnouncementForm.querySelector('#announcementDate').value = isoDate;
+        const pr = addAnnouncementForm.querySelector('#announcementPriority');
+        if (pr) pr.value = priorityText;
+        // update modal title
+        addAnnouncementModal.querySelector('.modal-header h3').innerHTML = '<i class="fas fa-edit"></i> Edit Announcement';
+        addAnnouncementModal.style.display = 'flex';
+    }
+
+    function buildAnnouncementHtml(ann, important) {
+        const id = ann.id;
+        const title = escapeHtml(ann.title);
+        const content = escapeHtml(ann.content).replace(/\n/g, '<br/>');
+        const date = formatDatePretty(ann.announcement_date);
+        const priority = capitalizeFirst(ann.priority || 'Normal');
+        const impClass = important ? ' important' : '';
+        return `
+            <div class="announcement-item${impClass}" data-id="${id}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                    <div style="flex:1">
+                        <h4 class="ann-title">${title}</h4>
+                        <div class="announcement-meta">
+                            <span class="ann-date">${date}</span>
+                            <span class="ann-priority">${priority} Priority</span>
+                        </div>
+                        <p class="ann-content">${content}</p>
+                    </div>
+                    <div class="announcement-actions" style="margin-left:12px;display:flex;flex-direction:column;gap:8px;">
+                        <button class="action-btn edit-ann-btn" data-id="${id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="action-btn archive-btn del-ann-btn" data-id="${id}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && employeeModal.style.display === 'flex') {
             employeeModal.style.display = 'none';
@@ -305,3 +496,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+// Small helpers used above
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function formatDatePretty(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
+}
+
+function capitalizeFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
