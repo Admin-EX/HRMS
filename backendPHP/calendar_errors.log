@@ -1,0 +1,156 @@
+[2026-02-06 16:49:18] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-14:00","category":"meeting","color":"#ff8a00","details":"asddsdsaeasd","time_display":"","is_imported":"0"}}
+[2026-02-06 16:51:37] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-14 22:59:00","category":"work","color":"#007bff","details":"sadds","time_display":"22:59","is_imported":"0"}}
+[2026-02-06 16:51:55] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-14 10:00:00","category":"work","color":"#007bff","details":"adsds","time_display":"10:00","is_imported":"0"}}
+[2026-02-06 16:52:47] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"adszad","start_datetime":"2026-02-14:00","category":"meeting","color":"#ff8a00","details":"dasdasdas","time_display":"","is_imported":"0"}}
+[2026-02-06 16:54:17] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"adassda","start_datetime":"2026-02-14 10:00:00","category":"work","color":"#007bff","details":"asddas","time_display":"10:00","is_imported":"0"}}
+[2026-02-06 16:55:04] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-14 12:59:00","category":"work","color":"#007bff","details":"adsdas","time_display":"12:59","is_imported":"0"}}
+[2026-02-06 16:55:23] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-14 12:59:00","category":"work","color":"#007bff","details":"adsdas","time_display":"12:59","is_imported":"0"}}
+[2026-02-06 16:55:23] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-06 16:55:23] Creating event | Data: {"title":"sample","start_datetime":"2026-02-14 12:59:00","category":"work","employee_number":"BPC-2019-00525452"}
+[2026-02-06 16:55:23] Event created successfully | Data: {"new_id":14,"title":"sample"}
+[2026-02-06 16:55:38] Request received | Data: {"action":"delete","employee_id":"BPC-2019-00525452","post_data":{"action":"delete","id":"14"}}
+[2026-02-06 16:55:38] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-06 16:55:38] Deleting event | Data: {"id":"14","employee_number":"BPC-2019-00525452"}
+[2026-02-06 16:55:38] Event deleted | Data: {"id":"14","affected_rows":1}
+[2026-02-06 16:55:53] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-07 22:00:00","category":"work","color":"#007bff","details":"adsasdads","time_display":"22:00","is_imported":"0"}}
+[2026-02-06 16:55:53] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-06 16:55:53] Creating event | Data: {"title":"sample","start_datetime":"2026-02-07 22:00:00","category":"work","employee_number":"BPC-2019-00525452"}
+[2026-02-06 16:55:53] Event created successfully | Data: {"new_id":15,"title":"sample"}
+[2026-02-12 12:45:08] Request received | Data: {"action":"create","employee_id":"BPC-2026-00525453","post_data":{"action":"create","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0"}}
+[2026-02-12 12:45:08] Employee found | Data: {"employee_number":"BPC-2026-00525453"}
+[2026-02-12 12:45:08] Creating event | Data: {"title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","category":"personal","employee_number":"BPC-2026-00525453"}
+[2026-02-12 12:45:08] Event created successfully | Data: {"new_id":16,"title":"Namatay kong kaibigan"}
+[2026-02-13 18:37:54] Request received | Data: {"action":"create","employee_id":"BPC-2019-00525452","post_data":{"action":"create","title":"sample","start_datetime":"2026-02-14 10:20:00","category":"work","color":"#007bff","details":"sample","time_display":"10:20","is_imported":"0"}}
+[2026-02-13 18:37:54] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:37:54] Creating event | Data: {"title":"sample","start_datetime":"2026-02-14 10:20:00","category":"work","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:37:54] Event created successfully | Data: {"new_id":17,"title":"sample"}
+[2026-02-13 18:40:44] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:40:44] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:40:44] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:40:44] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:40:44] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:41:05] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-16 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:41:05] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:05] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-16 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:05] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:41:05] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:41:15] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-16 10:00:00","category":"personal","color":"#00a884","details":"samplee","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:41:15] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:15] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-16 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:15] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:41:15] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:41:20] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibiganaa","start_datetime":"2026-02-16 10:00:00","category":"personal","color":"#00a884","details":"samplee","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:41:20] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:20] Updating event | Data: {"id":"16","title":"Namatay kong kaibiganaa","start_datetime":"2026-02-16 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:20] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:41:20] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:41:48] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-15 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:41:48] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:48] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-15 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:41:48] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:41:48] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:42:16] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-15 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:42:16] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:42:16] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-15 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:42:16] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:42:16] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:42:30] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-15 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:42:30] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:42:30] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-15 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:42:30] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:42:30] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:42:37] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-14 10:20:00","category":"work","color":"#007bff","details":"sample","time_display":"10:20","is_imported":"0","id":"17"}}
+[2026-02-13 18:42:37] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:42:37] Updating event | Data: {"id":"17","title":"sample","start_datetime":"2026-02-14 10:20:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:42:37] Event updated | Data: {"id":"17","affected_rows":1}
+[2026-02-13 18:44:09] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-13 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"1770391884827610"}}
+[2026-02-13 18:44:09] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:44:09] Updating event | Data: {"id":"1770391884827610","title":"sample","start_datetime":"2026-02-13 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:44:09] Event updated | Data: {"id":"1770391884827610","affected_rows":0}
+[2026-02-13 18:44:09] No rows affected - Event may not exist or no changes made | Data: {"id":"1770391884827610"}
+[2026-02-13 18:44:28] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-13 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"1770391884827610"}}
+[2026-02-13 18:44:28] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:44:28] Updating event | Data: {"id":"1770391884827610","title":"sample","start_datetime":"2026-02-13 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:44:28] Event updated | Data: {"id":"1770391884827610","affected_rows":0}
+[2026-02-13 18:44:28] No rows affected - Event may not exist or no changes made | Data: {"id":"1770391884827610"}
+[2026-02-13 18:45:46] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-13 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"1770391884827610"}}
+[2026-02-13 18:45:46] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:45:46] Updating event | Data: {"id":"1770391884827610","title":"sample","start_datetime":"2026-02-13 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:45:46] Event updated | Data: {"id":"1770391884827610","affected_rows":0}
+[2026-02-13 18:45:46] No rows affected - Event may not exist or no changes made | Data: {"id":"1770391884827610"}
+[2026-02-13 18:45:59] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-16 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"1770391884827610"}}
+[2026-02-13 18:45:59] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:45:59] Updating event | Data: {"id":"1770391884827610","title":"sample","start_datetime":"2026-02-16 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:45:59] Event updated | Data: {"id":"1770391884827610","affected_rows":0}
+[2026-02-13 18:45:59] No rows affected - Event may not exist or no changes made | Data: {"id":"1770391884827610"}
+[2026-02-13 18:46:04] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:46:04] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:46:04] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:46:04] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:46:04] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:46:19] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigansaasddas","start_datetime":"2026-02-16 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:46:19] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:46:19] Updating event | Data: {"id":"16","title":"Namatay kong kaibigansaasddas","start_datetime":"2026-02-16 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:46:19] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:46:19] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:46:47] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:46:47] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:46:47] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:46:47] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:46:47] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:47:01] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-13 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"1770391884827610"}}
+[2026-02-13 18:47:01] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:01] Updating event | Data: {"id":"1770391884827610","title":"sample","start_datetime":"2026-02-13 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:01] Event updated | Data: {"id":"1770391884827610","affected_rows":0}
+[2026-02-13 18:47:01] No rows affected - Event may not exist or no changes made | Data: {"id":"1770391884827610"}
+[2026-02-13 18:47:28] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-13 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"1770391884827610"}}
+[2026-02-13 18:47:28] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:28] Updating event | Data: {"id":"1770391884827610","title":"sample","start_datetime":"2026-02-13 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:28] Event updated | Data: {"id":"1770391884827610","affected_rows":0}
+[2026-02-13 18:47:28] No rows affected - Event may not exist or no changes made | Data: {"id":"1770391884827610"}
+[2026-02-13 18:47:38] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","category":"work","color":"#007bff","details":"Present quarterly results to ABC Corp client","time_display":"14:30","is_imported":"0","id":"3"}}
+[2026-02-13 18:47:38] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:38] Updating event | Data: {"id":"3","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:38] Event updated | Data: {"id":"3","affected_rows":1}
+[2026-02-13 18:47:48] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","category":"work","color":"#007bff","details":"Present quarterly results to ABC Corp client","time_display":"14:30","is_imported":"0","id":"3"}}
+[2026-02-13 18:47:48] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:48] Updating event | Data: {"id":"3","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:48] Event updated | Data: {"id":"3","affected_rows":1}
+[2026-02-13 18:47:52] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"sample","start_datetime":"2026-02-14 10:20:00","category":"work","color":"#007bff","details":"sample","time_display":"10:20","is_imported":"0","id":"17"}}
+[2026-02-13 18:47:52] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:52] Updating event | Data: {"id":"17","title":"sample","start_datetime":"2026-02-14 10:20:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:47:52] Event updated | Data: {"id":"17","affected_rows":1}
+[2026-02-13 18:48:23] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","category":"work","color":"#007bff","details":"Present quarterly results to ABC Corp client","time_display":"14:30","is_imported":"0","id":"3"}}
+[2026-02-13 18:48:23] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:23] Updating event | Data: {"id":"3","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:23] Event updated | Data: {"id":"3","affected_rows":1}
+[2026-02-13 18:48:37] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"10:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:48:37] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:37] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-14 10:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:37] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:48:37] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-02-13 18:48:42] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","category":"work","color":"#007bff","details":"Present quarterly results to ABC Corp client","time_display":"14:30","is_imported":"0","id":"3"}}
+[2026-02-13 18:48:42] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:42] Updating event | Data: {"id":"3","title":"Client Presentation","start_datetime":"2026-02-18 14:30:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:42] Event updated | Data: {"id":"3","affected_rows":1}
+[2026-02-13 18:48:54] Request received | Data: {"action":"update","employee_id":"BPC-2019-00525452","post_data":{"action":"update","title":"Namatay kong kaibigan","start_datetime":"2026-02-16 08:00:00","category":"personal","color":"#00a884","details":"sample","time_display":"08:00","is_imported":"0","id":"16"}}
+[2026-02-13 18:48:54] Employee found | Data: {"employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:54] Updating event | Data: {"id":"16","title":"Namatay kong kaibigan","start_datetime":"2026-02-16 08:00:00","employee_number":"BPC-2019-00525452"}
+[2026-02-13 18:48:54] Event updated | Data: {"id":"16","affected_rows":0}
+[2026-02-13 18:48:54] No rows affected - Event may not exist or no changes made | Data: {"id":"16"}
+[2026-03-05 14:46:05] Request received | Data: {"action":"create","employee_id":"EMP-2025-001","post_data":{"action":"create","title":"Leave request","start_datetime":"2026-03-06 07:00:00","category":"personal","color":"#00a884","details":"Medical Certificate Request in Clinic","time_display":"07:00","is_imported":"0"}}
+[2026-03-05 14:46:05] Employee found | Data: {"employee_number":"EMP-2025-001"}
+[2026-03-05 14:46:05] Creating event | Data: {"title":"Leave request","start_datetime":"2026-03-06 07:00:00","category":"personal","employee_number":"EMP-2025-001"}
+[2026-03-05 14:46:05] Event created successfully | Data: {"new_id":19,"title":"Leave request"}
+[2026-03-05 14:53:31] Request received | Data: {"action":"delete","employee_id":"EMP-2025-001","post_data":{"action":"delete","id":"19"}}
+[2026-03-05 14:53:31] Employee found | Data: {"employee_number":"EMP-2025-001"}
+[2026-03-05 14:53:31] Deleting event | Data: {"id":"19","employee_number":"EMP-2025-001"}
+[2026-03-05 14:53:31] Event deleted | Data: {"id":"19","affected_rows":1}
+[2026-03-05 15:14:44] Request received | Data: {"action":"create","employee_id":"EMP-2025-001","post_data":{"action":"create","title":"Meeting class","start_datetime":"2026-03-09 13:00:00","category":"meeting","color":"#ff8a00","details":"meeeting with my co-teachers","time_display":"13:00","is_imported":"0"}}
+[2026-03-05 15:14:44] Employee found | Data: {"employee_number":"EMP-2025-001"}
+[2026-03-05 15:14:44] Creating event | Data: {"title":"Meeting class","start_datetime":"2026-03-09 13:00:00","category":"meeting","employee_number":"EMP-2025-001"}
+[2026-03-05 15:14:44] Event created successfully | Data: {"new_id":20,"title":"Meeting class"}
+[2026-03-05 15:15:20] Request received | Data: {"action":"delete","employee_id":"EMP-2025-001","post_data":{"action":"delete","id":"20"}}
+[2026-03-05 15:15:20] Employee found | Data: {"employee_number":"EMP-2025-001"}
+[2026-03-05 15:15:20] Deleting event | Data: {"id":"20","employee_number":"EMP-2025-001"}
+[2026-03-05 15:15:20] Event deleted | Data: {"id":"20","affected_rows":1}

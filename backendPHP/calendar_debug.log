@@ -1,0 +1,157 @@
+[06-Feb-2026 15:04:12 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:04:12 Europe/Berlin] Exception: Unknown column 'username' in 'where clause'
+[06-Feb-2026 15:04:12 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\hrms\backendPHP\api_calendar.php(49): mysqli->query('SELECT id FROM ...')
+#1 {main}
+[06-Feb-2026 15:07:24 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:07:24 Europe/Berlin] PHP Warning:  Undefined array key "id" in C:\xampp\htdocs\hrms\backendPHP\api_calendar.php on line 52
+[06-Feb-2026 15:07:24 Europe/Berlin] User ID not found. Session: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:07:43 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:07:43 Europe/Berlin] PHP Warning:  Undefined array key "id" in C:\xampp\htdocs\hrms\backendPHP\api_calendar.php on line 52
+[06-Feb-2026 15:07:43 Europe/Berlin] User ID not found. Session: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:08:38 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:08:38 Europe/Berlin] PHP Warning:  Undefined variable $logsession in C:\xampp\htdocs\hrms\backendPHP\api_calendar.php on line 49
+[06-Feb-2026 15:08:38 Europe/Berlin] Found user_id: BPC-2019-00525452
+[06-Feb-2026 15:08:38 Europe/Berlin] Action: add_event
+[06-Feb-2026 15:08:38 Europe/Berlin] POST data: Array
+(
+    [action] => add_event
+    [user_id] => 11
+    [title] => sample
+    [start_datetime] => 2026-02-07 10:31:00
+    [category] => work
+    [color] => #007bff
+    [details] => dsdasds
+    [time_display] => 10:31
+)
+
+[06-Feb-2026 15:08:38 Europe/Berlin] SQL Query: INSERT INTO calendar_events (user_id, title, start_datetime, category, color, details, time_display, created_at) 
+                      VALUES ('BPC-2019-00525452', 'sample', '2026-02-07 10:31:00', 'work', '#007bff', 'dsdasds', '10:31', NOW())
+[06-Feb-2026 15:08:38 Europe/Berlin] Exception: Cannot add or update a child row: a foreign key constraint fails (`hrms_database`.`calendar_events`, CONSTRAINT `calendar_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+[06-Feb-2026 15:08:38 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\hrms\backendPHP\api_calendar.php(100): mysqli->query('INSERT INTO cal...')
+#1 {main}
+[06-Feb-2026 15:08:58 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:08:58 Europe/Berlin] PHP Warning:  Undefined array key "id" in C:\xampp\htdocs\hrms\backendPHP\api_calendar.php on line 52
+[06-Feb-2026 15:08:58 Europe/Berlin] User ID not found. Session: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:10:59 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:10:59 Europe/Berlin] PHP Warning:  Undefined array key "employee_id" in C:\xampp\htdocs\hrms\backendPHP\api_calendar.php on line 52
+[06-Feb-2026 15:10:59 Europe/Berlin] User ID not found. Session: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:11:57 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:11:57 Europe/Berlin] PHP Warning:  Undefined array key "employee_id" in C:\xampp\htdocs\hrms\backendPHP\api_calendar.php on line 52
+[06-Feb-2026 15:11:57 Europe/Berlin] User ID not found. Session: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:14:06 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:14:06 Europe/Berlin] Exception: Unknown column 'username' in 'where clause'
+[06-Feb-2026 15:14:06 Europe/Berlin] Stack trace: #0 C:\xampp\htdocs\hrms\backendPHP\api_calendar.php(50): mysqli->query('SELECT employee...')
+#1 {main}
+[06-Feb-2026 15:16:12 Europe/Berlin] Session data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+)
+
+[06-Feb-2026 15:16:12 Europe/Berlin] User lookup query: SELECT employee_number FROM users WHERE email = 'BPC-2019-00525452' OR employee_number = 'BPC-2019-00525452' LIMIT 1
+[06-Feb-2026 15:16:12 Europe/Berlin] Found user in DB. employee_number: 0
+[06-Feb-2026 15:16:12 Europe/Berlin] Using employee_number from session: 0
+[06-Feb-2026 15:16:12 Europe/Berlin] User ID not found. Session: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+    [employee_number] => 0
+)
+
+[06-Feb-2026 15:19:32 Europe/Berlin] === CALENDAR DEBUG SESSION START ===
+[06-Feb-2026 15:19:32 Europe/Berlin] Session ID: klha2kss9u0nmg0v5cmttbed7c
+[06-Feb-2026 15:19:32 Europe/Berlin] Full Session Data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+    [employee_number] => 0
+)
+
+[06-Feb-2026 15:19:32 Europe/Berlin] User identifier from session: BPC-2019-00525452
+[06-Feb-2026 15:19:32 Europe/Berlin] Identifier is string: BPC-2019-00525452
+[06-Feb-2026 15:19:32 Europe/Berlin] Trying employee_number exact: SELECT id, employee_number FROM users WHERE employee_number = 'BPC-2019-00525452' LIMIT 1
+[06-Feb-2026 15:19:32 Europe/Berlin] SUCCESS with employee_number exact: id=4, employee_number=BPC-2019-00525452
+[06-Feb-2026 15:19:32 Europe/Berlin] === SUCCESS: Found user_id = 4 ===
+[06-Feb-2026 15:19:32 Europe/Berlin] Action requested: add_event
+[06-Feb-2026 15:19:32 Europe/Berlin] Event added successfully. ID: 4
+[06-Feb-2026 15:27:00 Europe/Berlin] === CALENDAR DEBUG SESSION START ===
+[06-Feb-2026 15:27:00 Europe/Berlin] Session ID: klha2kss9u0nmg0v5cmttbed7c
+[06-Feb-2026 15:27:00 Europe/Berlin] Full Session Data: Array
+(
+    [role] => employee
+    [loggedUser] => BPC-2019-00525452
+    [employee_number] => 0
+)
+
+[06-Feb-2026 15:27:00 Europe/Berlin] User identifier from session: BPC-2019-00525452
+[06-Feb-2026 15:27:00 Europe/Berlin] Identifier is string: BPC-2019-00525452
+[06-Feb-2026 15:27:00 Europe/Berlin] Trying employee_number exact: SELECT id, employee_number FROM users WHERE employee_number = 'BPC-2019-00525452' LIMIT 1
+[06-Feb-2026 15:27:00 Europe/Berlin] SUCCESS with employee_number exact: id=4, employee_number=BPC-2019-00525452
+[06-Feb-2026 15:27:00 Europe/Berlin] === SUCCESS: Found user_id = 4 ===
+[06-Feb-2026 15:27:00 Europe/Berlin] Action requested: add_event
+[06-Feb-2026 15:27:00 Europe/Berlin] Event added successfully. ID: 5

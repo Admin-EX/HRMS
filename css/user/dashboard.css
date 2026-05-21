@@ -1,0 +1,1221 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f5f8fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 🔹 Top Header Bar */
+    .top-bar {
+      width: 100%;
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 50px;
+      border-bottom: 3px solid rgba(255,255,255,0.2);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      height: 75px;
+    }
+
+    /* ✅ White background sa logo area */
+    .top-left {
+      background: white;
+      padding: 6px 14px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .top-left img {
+      width: 200px;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+    }
+
+    .notif {
+      position: relative;
+      font-size: 22px;
+      cursor: pointer;
+      color: rgb(246, 222, 10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+.notif::after {
+    content: attr(data-count);
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    min-width: 18px;
+    height: 18px;
+    background: #ff4444;
+    border-radius: 50%;
+    border: 2px solid white;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+    .user-name {
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    /* 🔔 Dropdown Notifications */
+    .notif-dropdown {
+      position: absolute;
+      top: 55px;
+      right: 0;
+      background: #fff;
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      width: 280px;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 99;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .notif-dropdown.active {
+      display: flex;
+    }
+
+    .notif-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notif-item i {
+      font-size: 16px;
+    }
+
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+
+    .notif-item:hover {
+      background: #f5f8fa;
+    }
+
+    .view-all {
+      text-align: center;
+      padding: 10px;
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    /* 🔹 Modal for "View All Notifications" */
+    .notif-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(3px);
+    }
+
+    .notif-modal.active {
+      display: flex;
+    }
+
+    .notif-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      width: 420px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .notif-content h3 {
+      margin-bottom: 15px;
+      text-align: center;
+      color: #00a884;
+    }
+
+    .notif-content .notif-item {
+      border-left: 4px solid #00a884;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      background: #f9fbfc;
+    }
+
+    .close-modal {
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes fadeInUp {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* Container below header */
+    .main-container {
+      display: flex;
+      flex: 1;
+      margin-top: 75px;
+    }
+
+    /* 🔹 Sidebar */
+    .sidebar {
+      width: 250px;
+      background: #fff;
+      border-right: 2px solid #d9d9d9;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 0 0 25px 0;
+    }
+
+    .profile-card {
+      text-align: center;
+      padding: 25px 15px 15px;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    .profile-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+      font-size: 28px;
+      line-height: 90px;
+      margin: 0 auto 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .profile-circle span {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .profile-circle.has-image span {
+      display: none;
+    }
+
+    .profile-circle.has-image img {
+      display: block;
+    }
+
+    .upload-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      text-align: center;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .profile-circle:hover .upload-overlay {
+      display: flex;
+    }
+
+    .profile-card h3 {
+      color: #007b66;
+      font-size: 17px;
+      margin-bottom: 3px;
+    }
+
+    .profile-card p {
+      font-size: 13px;
+      color: #777;
+    }
+
+    /* Masters Status Badge */
+    .masters-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    .masters-in-progress {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .masters-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .masters-not-applicable {
+      background: #f8f9fa;
+      color: #6c757d;
+    }
+
+    .menu {
+      list-style: none;
+      margin-top: 20px;
+      padding: 0;
+    }
+
+    .menu li {
+      padding: 14px 25px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #333;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .menu li.active,
+    .menu li:hover {
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: #fff;
+      border-radius: 0 20px 20px 0;
+    }
+
+    .bottom-logo {
+      text-align: center;
+      padding: 20px 0px 0;
+      border-top: 1px solid #eee;
+    }
+
+    .bottom-logo img {
+      width: 250px;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    /* 🔹 Main Content */
+    .main-content {
+      flex: 1;
+      padding: 25px 50px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+      padding: 25px 40px;
+      border-radius: 12px;
+      margin-top: 25px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header h2 {
+      font-weight: 600;
+      font-size: 24px;
+    }
+
+    header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Masters Program Banner */
+    .masters-banner {
+      background: linear-gradient(135deg, #e6f7ff, #f0f9ff);
+      border: 2px solid #00a884;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .masters-banner h3 {
+      color: #007b66;
+      margin-bottom: 8px;
+    }
+
+    .masters-banner p {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .masters-banner .btn {
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .masters-banner .btn:hover {
+      opacity: 0.9;
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      flex: 1;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      padding: 25px;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .card i {
+      font-size: 35px;
+      margin-bottom: 10px;
+      color: #00a884;
+      display: block;
+    }
+
+    .card h3 {
+      color: #00a884;
+      font-size: 28px;
+    }
+
+    .card p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    /* Masters Status Card */
+    .card.masters-card {
+      background: linear-gradient(135deg, #f0fff8, #e6fff2);
+      border: 2px solid #00cc88;
+    }
+
+    .masters-status {
+      display: inline-block;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    /* Profile & History */
+    .info-section {
+      display: flex;
+      gap: 25px;
+      margin-top: 40px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .profile {
+      flex: 0.6;
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      min-width: 280px;
+      position: relative;
+    }
+
+    .edit-btn {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .edit-btn:hover {
+      opacity: 0.85;
+    }
+
+    .history {
+      flex: 0.4;
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      min-width: 250px;
+    }
+
+    .profile h3,
+    .history h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: bold;
+      font-size: 18px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .avatar.has-image span {
+      display: none;
+    }
+
+    .avatar.has-image img {
+      display: block;
+    }
+
+    .profile-header h4 {
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .profile-header p {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.3;
+    }
+
+    .emp-id {
+      color: #00a884;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .info-box {
+      background-color: #f2f4f7;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .info-value {
+      font-weight: 600;
+      font-size: 13px;
+      color: #222;
+    }
+
+    /* Masters Program Info Box */
+    .masters-info-box {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #e6fff2, #f0fff8);
+      border: 1px solid #00cc88;
+    }
+
+    .masters-update-btn {
+      background: #00a884;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .history-item {
+      padding: 10px 15px;
+      border: 1px solid #e5e5e5;
+      border-left: 5px solid #00a884;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #fff;
+      transition: 0.3s;
+    }
+
+    .history-item:hover {
+      background: #f8fdfa;
+    }
+
+    .history-item strong {
+      display: block;
+      color: #00a884;
+      margin-bottom: 3px;
+    }
+
+    .history-item span {
+      font-size: 12px;
+      color: gray;
+    }
+
+    .view {
+      color: #00a884;
+      cursor: pointer;
+      font-size: 14px;
+      float: right;
+    }
+
+    /* 🔹 CHANGE PASSWORD SECTION */
+    .password-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fdfa, #f0f9ff);
+      border-radius: 12px;
+      border: 1px solid #00a884;
+      display: none;
+    }
+
+    .password-section h4 {
+      color: #00a884;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+    }
+
+    .password-form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .password-form-group label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .password-form-group input {
+      width: 100%;
+      padding: 12px 45px 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: 0.3s;
+      background: white;
+    }
+
+    .password-form-group input:focus {
+      border-color: #00a884;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.1);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 40px;
+      background: none;
+      border: none;
+      color: #777;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 5px;
+    }
+
+    .password-toggle:hover {
+      color: #00a884;
+    }
+
+    /* Password Strength Indicator */
+    .password-strength {
+      height: 6px;
+      margin-top: 8px;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      background: #eee;
+      overflow: hidden;
+    }
+
+    .strength-indicator {
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .strength-weak { background: #ff4757; width: 30%; }
+    .strength-fair { background: #ffa502; width: 60%; }
+    .strength-good { background: #2ed573; width: 100%; }
+
+    /* Password Requirements */
+    .password-requirements {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #666;
+      border-left: 4px solid #00a884;
+    }
+
+    .password-requirements ul {
+      margin: 8px 0 0 20px;
+    }
+
+    .password-requirements li {
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .requirement-met {
+      color: #00a884;
+    }
+
+    .requirement-met::before {
+      content: "✓";
+      color: #00a884;
+      font-weight: bold;
+    }
+
+    .requirement-not-met {
+      color: #999;
+    }
+
+    .requirement-not-met::before {
+      content: "○";
+      color: #999;
+    }
+
+    .password-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+      justify-content: flex-end;
+    }
+
+    .password-actions button {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.3s;
+    }
+
+    .save-password-btn {
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+    }
+
+    .save-password-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .cancel-password-btn {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .cancel-password-btn:hover {
+      background: #d0d0d0;
+    }
+
+    /* 🔹 OTP VERIFICATION MODAL */
+    .otp-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+    }
+
+    .otp-modal.active {
+      display: flex;
+    }
+
+    .otp-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 450px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .otp-content h3 {
+      color: #00a884;
+      margin-bottom: 20px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 22px;
+    }
+
+    .otp-method-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .otp-method-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .otp-method-btn.active {
+      background: #00a884;
+      color: white;
+      border-color: #00a884;
+    }
+
+    .otp-method-btn:hover:not(.active) {
+      border-color: #00a884;
+    }
+
+    .otp-destination {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 25px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .otp-destination strong {
+      color: #00a884;
+    }
+
+    .otp-input-container {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 25px 0;
+    }
+
+    .otp-input {
+      width: 50px;
+      height: 60px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #f8f9fa;
+      transition: 0.3s;
+    }
+
+    .otp-input:focus {
+      border-color: #00a884;
+      outline: none;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.1);
+    }
+
+    .resend-otp {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .resend-otp a {
+      color: #00a884;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .resend-otp a:hover {
+      text-decoration: underline;
+    }
+
+    .otp-timer {
+      color: #ff4757;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .otp-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .otp-actions button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.3s;
+    }
+
+    .verify-otp-btn {
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+    }
+
+    .verify-otp-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .cancel-otp-btn {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .cancel-otp-btn:hover {
+      background: #d0d0d0;
+    }
+
+    /* Modal for image upload */
+    .image-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .image-modal.active {
+      display: flex;
+    }
+
+    .image-modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 350px;
+      text-align: center;
+    }
+
+    .image-modal-content h3 {
+      color: #00a884;
+      margin-bottom: 20px;
+    }
+
+    .image-preview {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      background: #f0f0f0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .save-btn {
+      background: linear-gradient(135deg, #00a884, #00c0ff);
+      color: white;
+    }
+
+    .cancel-btn {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    /* Masters Status Modal */
+    .masters-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .masters-modal.active {
+      display: flex;
+    }
+
+    .masters-modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 450px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .masters-modal-content h3 {
+      color: #00a884;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .masters-form-group {
+      margin-bottom: 20px;
+    }
+
+    .masters-form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .masters-form-group select,
+    .masters-form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .notification-status {
+      background: #e8f5e9;
+      border-left: 4px solid #00cc88;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+
+    .notification-status h4 {
+      color: #00664d;
+      margin-bottom: 8px;
+    }
+
+    .masters-modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 25px;
+    }
+
+    /* 🔹 CHANGE PASSWORD BUTTON */
+    .change-password-btn {
+      position: absolute;
+      top: 25px;
+      right: 100px;
+      background: #ff9966;
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .change-password-btn:hover {
+      background: #ff8c52;
+    }
+    
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+}
+
+.notif-item:hover {
+  background: #f5f7fa;
+  transform: translateX(3px);
+}
+
+.notif-item i {
+  font-size: 18px;
+  color: #3498db;
+  min-width: 24px;
+}
+
+.notif-details-dropdown {
+  flex: 1;
+}
+
+.notif-details-dropdown strong {
+  display: block;
+  font-size: 14px;
+  color: #333;
+}
+
+.notif-details-dropdown p {
+  font-size: 12px;
+  margin: 3px 0;
+  color: #666;
+}
+
+.notif-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff3b30;
+  border-radius: 50%;
+}
+
+.notif-item.unread {
+  background: #eef6ff;
+}
+a {
+  text-decoration: none;
+}

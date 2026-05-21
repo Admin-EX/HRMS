@@ -1,0 +1,171 @@
+/* ============================================
+   SIDEBAR STYLES
+   ============================================ */
+
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Brand Section */
+.brand {
+    padding: 25px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.brand-box {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.brand span {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Navigation Menu */
+.menu {
+    flex: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+}
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 25px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 5px 15px;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.menu a.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.menu a i {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Admin Section */
+.admin {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(245, 87, 108, 0.3);
+}
+
+.admin div {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.admin small {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+}
+
+/* Scrollbar Styling */
+.menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px;
+    }
+    
+    .brand span,
+    .menu a span,
+    .admin div {
+        display: none;
+    }
+    
+    .brand {
+        justify-content: center;
+        padding: 20px 10px;
+    }
+    
+    .menu a {
+        justify-content: center;
+        padding: 14px 10px;
+        margin: 5px 10px;
+    }
+    
+    .admin {
+        justify-content: center;
+        padding: 15px 10px;
+    }
+}
