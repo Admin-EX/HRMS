@@ -514,7 +514,7 @@ $departments[] = [
 
             <div class="analytics-section">
                 <p style="font-size: 12px; color: #666; text-align: center;">
-                    <strong>Note:</strong> Data updated as of October 2024. For detailed credential verification, contact HR department.
+                    <strong>Note:</strong> Data updated as of October 2025. For detailed credential verification, contact HR department.
                 </p>
             </div>
 

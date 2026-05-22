@@ -1,6 +1,10 @@
 // ─── EMPLOYEE DATABASE (populated from DB via AJAX) ──────────────────────────
 let employeeDatabase = {};
 let employeeCounts   = {};
+let leaveDetailsModal;
+let leaveDetailsContent;
+let closeLeaveDetailsModal;
+let closeLeaveDetailsButton;
 
 // ─── LOAD ALL EMPLOYEES ON PAGE LOAD ─────────────────────────────────────────
 function loadEmployeeDatabase() {
@@ -82,6 +86,32 @@ function updateAnalyticsBars(teachingAnalytics) {
 
     // Total
     document.getElementById('totalTP').textContent = `${teachingAnalytics.total} employees`;
+}
+
+function initLeaveModal() {
+    leaveDetailsModal = document.getElementById('leaveDetailsModal');
+    leaveDetailsContent = document.getElementById('leaveDetailsContent');
+    closeLeaveDetailsModal = document.getElementById('closeLeaveDetailsModal');
+    closeLeaveDetailsButton = document.getElementById('closeLeaveDetailsButton');
+
+    if (closeLeaveDetailsModal) closeLeaveDetailsModal.addEventListener('click', hideLeaveDetailsModal);
+    if (closeLeaveDetailsButton) closeLeaveDetailsButton.addEventListener('click', hideLeaveDetailsModal);
+    if (leaveDetailsModal) {
+        leaveDetailsModal.addEventListener('click', e => {
+            if (e.target === leaveDetailsModal) hideLeaveDetailsModal();
+        });
+    }
+}
+
+function hideLeaveDetailsModal() {
+    if (leaveDetailsModal) leaveDetailsModal.style.display = 'none';
+    if (leaveDetailsContent) leaveDetailsContent.innerHTML = '';
+}
+
+function formatDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value || 'N/A';
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 // Toast helper: creates a container and shows a toast message
@@ -259,16 +289,46 @@ function viewYearsService() {
 }
 
 // ─── LEAVE REQUESTS (kept separate — fetched from your existing data) ─────────
-function viewLeaveRequest(employeeId) {
-    // If you have a separate leave endpoint, fetch it here.
-    // For now it mirrors the original alert behaviour.
-    fetch(`../../backendPHP/getLeaveRequest.php?id=${encodeURIComponent(employeeId)}`)
+function viewLeaveRequest(requestId) {
+    fetch('../../backendPHP/admin_leave/get_leave_request.php')
         .then(res => res.json())
-        .then(req => {
-            if (!req) { showToast('No leave request found', 'error'); return; }
-            showToast('Loaded leave request details', 'info');
+        .then(data => {
+            if (data.error) {
+                showToast('Could not load leave request details', 'error');
+                console.error('Leave request error:', data.error);
+                return;
+            }
+            const request = (data.requests || []).find(r => String(r.id) === String(requestId));
+            if (!request) {
+                showToast('No leave request found', 'error');
+                return;
+            }
+            showLeaveDetails(request);
         })
-        .catch(() => { showToast('Could not load leave request details', 'error'); });
+        .catch(err => {
+            console.error('Leave request fetch failed:', err);
+            showToast('Could not load leave request details', 'error');
+        });
+}
+
+function showLeaveDetails(request) {
+    if (!leaveDetailsContent) return;
+    const name = request.employee?.name || request.employee?.id || 'Unknown';
+    const dept = request.employee?.department || 'N/A';
+    leaveDetailsContent.innerHTML = `
+        <div class="detail-row"><strong>Request ID:</strong> ${request.id}</div>
+        <div class="detail-row"><strong>Employee:</strong> ${name} (${request.employee?.id || 'N/A'})</div>
+        <div class="detail-row"><strong>Department:</strong> ${dept}</div>
+        <div class="detail-row"><strong>Leave Type:</strong> ${request.leaveType}</div>
+        <div class="detail-row"><strong>Start Date:</strong> ${formatDate(request.startDate)}</div>
+        <div class="detail-row"><strong>End Date:</strong> ${formatDate(request.endDate)}</div>
+        <div class="detail-row"><strong>Days:</strong> ${request.days}</div>
+        <div class="detail-row"><strong>Reason:</strong> ${request.reason || 'N/A'}</div>
+        <div class="detail-row"><strong>Contact During Leave:</strong> ${request.contactDuringLeave || 'N/A'}</div>
+        <div class="detail-row"><strong>Status:</strong> ${request.status || 'N/A'}</div>
+        <div class="detail-row"><strong>Submitted:</strong> ${formatDate(request.submittedDate)}</div>
+    `;
+    if (leaveDetailsModal) leaveDetailsModal.style.display = 'flex';
 }
 
 // ─── INITIALISE ───────────────────────────────────────────────────────────────
@@ -276,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load data
     loadAnalytics();
     loadEmployeeDatabase();
+    initLeaveModal();
 
     // Animate chart bars
     setTimeout(() => {

@@ -685,7 +685,7 @@ if ($result && mysqli_num_rows($result) > 0) {
             </div>
         <?php endif; ?>
 
-        <a href="SuperAdminLeave.php" class="view-all">
+        <a href="leave.php" class="view-all">
             View All Requests
             <i class="fas fa-arrow-right"></i>
         </a>
@@ -696,6 +696,19 @@ if ($result && mysqli_num_rows($result) > 0) {
             <!-- FOOTER -->
             <?php include("../components/footer.php"); ?>
         </main>
+    </div>
+
+    <div id="leaveDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-alt"></i> Leave Request Details</h3>
+                <button class="close-modal" id="closeLeaveDetailsModal">&times;</button>
+            </div>
+            <div class="modal-body" id="leaveDetailsContent"></div>
+            <div class="modal-actions">
+                <button class="action-btn view-btn" id="closeLeaveDetailsButton">Close</button>
+            </div>
+        </div>
     </div>
 
 

@@ -1275,7 +1275,7 @@ ${doc.status === 'pending' ? `
 
         function reviewSingleDocument(documentId) {
             console.log('Review document:', documentId);
-            alert('Review functionality coming soon for document ID: ' + documentId);
+            showToast('Review functionality coming soon for document ID: ' + documentId, 'info');
         }
 
         function editEmployee(empId) {
@@ -1286,7 +1286,7 @@ ${doc.status === 'pending' ? `
         function archiveEmployee(empId) {
             console.log('Archiving employee:', empId);
             if (confirm('Are you sure you want to archive this employee?')) {
-                alert('Archive functionality coming soon');
+                showToast('Archive functionality coming soon', 'info');
             }
         }
 
@@ -1425,6 +1425,7 @@ document.getElementById('exportBtn').addEventListener('click', function() {
     const originalContent = this.innerHTML;
     this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
     this.disabled = true;
+    showToast('Preparing export report...', 'info');
     
     // Build URL with current filters
     const params = new URLSearchParams({
@@ -1456,6 +1457,59 @@ document.getElementById('exportBtn').addEventListener('click', function() {
     window.open(`../../backendPHP/export_records_report.php?${params}`, '_blank');
 });
 */
+
+// Toast helper: creates a pop-up notification container and shows messages
+function showToast(message, type = 'info', duration = 3000) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        Object.assign(container.style, {
+            position: 'fixed',
+            right: '20px',
+            top: '20px',
+            zIndex: 99999,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            alignItems: 'flex-end'
+        });
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    const background = type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#34495e';
+    Object.assign(toast.style, {
+        background,
+        color: '#fff',
+        padding: '10px 14px',
+        borderRadius: '8px',
+        boxShadow: '0 6px 18px rgba(0,0,0,0.14)',
+        opacity: '0',
+        transform: 'translateY(-10px)',
+        transition: 'opacity 220ms ease, transform 220ms ease',
+        maxWidth: '360px',
+        fontSize: '14px',
+        lineHeight: '1.4'
+    });
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            if (toast.parentNode === container) container.removeChild(toast);
+        }, 260);
+    }, duration);
+}
+
 async function approveDocument(documentId) {
     if (!confirm('Approve this document?')) return;
     const empId = document.getElementById('modalEmpId').textContent;
@@ -1465,8 +1519,13 @@ async function approveDocument(documentId) {
         body: JSON.stringify({ document_id: documentId, status: 'approved' })
     });
     const data = await res.json();
-    if (data.success) { viewProfile(empId); loadEmployeeData(); }
-    else alert('Error: ' + data.message);
+    if (data.success) {
+        showToast('Document approved successfully.', 'success');
+        viewProfile(empId);
+        loadEmployeeData();
+    } else {
+        showToast('Error: ' + data.message, 'error');
+    }
 }
 
 async function rejectDocument(documentId) {
@@ -1479,8 +1538,13 @@ async function rejectDocument(documentId) {
         body: JSON.stringify({ document_id: documentId, status: 'rejected', notes: reason })
     });
     const data = await res.json();
-    if (data.success) { viewProfile(empId); loadEmployeeData(); }
-    else alert('Error: ' + data.message);
+    if (data.success) {
+        showToast('Document rejected successfully.', 'success');
+        viewProfile(empId);
+        loadEmployeeData();
+    } else {
+        showToast('Error: ' + data.message, 'error');
+    }
 }
     </script>
 </body>

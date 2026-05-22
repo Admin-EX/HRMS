@@ -653,6 +653,13 @@
             color: #777;
         }
 
+        .leave-item .action-btn {
+            min-width: 38px;
+            min-height: 38px;
+            padding: 0 12px;
+            justify-content: center;
+        }
+
         /* ACTION BUTTONS - MATCHING MAIN DESIGN */
         .action-buttons {
             display: flex;
@@ -1037,6 +1044,61 @@
             font-size: 14px;
             color: #666;
             margin-bottom: 15px;
+        }
+
+        #leaveDetailsContent {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .detail-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            align-items: center;
+            padding: 14px 16px;
+            border: 1px solid #f1f3f5;
+            border-radius: 10px;
+            background: #fbfcfe;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row strong {
+            min-width: 150px;
+            color: #222;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .detail-row span {
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .leave-details-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            background: #fbfcfe;
+            border: 1px solid #e9edf4;
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .leave-details-meta .detail-row {
+            border: none;
+            padding: 0;
+            gap: 12px 24px;
+        }
+
+        @media (max-width: 920px) {
+            #leaveDetailsContent {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* RESPONSIVE DESIGN - MATCHING MAIN DESIGN */

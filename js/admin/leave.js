@@ -500,7 +500,91 @@ function setupLeaveEventListeners() {
         currentFilter = this.dataset.status;
         renderLeaveTable();
     }));
-    document.getElementById('leaveExportBtn')?.addEventListener('click', () => showToast('Exporting leave report...', 'info'));
+    document.getElementById('leaveExportBtn')?.addEventListener('click', exportLeaveReport);
+}
+
+function buildCSV(headers, rows) {
+    const escapeCell = value => {
+        if (value === null || value === undefined) return '';
+        const text = String(value).replace(/"/g, '""');
+        return text.includes(',') || text.includes('"') || text.includes('\n') ? `"${text}"` : text;
+    };
+    const lines = [headers.map(escapeCell).join(',')];
+    rows.forEach(row => {
+        lines.push(headers.map(header => escapeCell(row[header] ?? '')).join(','));
+    });
+    return lines.join('\r\n');
+}
+
+function downloadCSV(filename, content) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportLeaveReport() {
+    const status = currentFilter || 'all';
+    const search = currentSearch ? encodeURIComponent(currentSearch) : '';
+    const url = `../../backendPHP/export_leave_report.php?status=${encodeURIComponent(status)}&search=${search}`;
+    showToast('Preparing leave export...', 'info');
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportOffsetReport() {
+    const rows = filterOffsetData();
+    if (!rows.length) {
+        showToast('No offset data available to export.', 'error');
+        return;
+    }
+    const headers = ['ID', 'Employee Number', 'Subject Code', 'Subject Description', 'Academic Term', 'Section', 'Original Schedule', 'Offset Schedule', 'Reason', 'Prepared By', 'Submit Date', 'Status'];
+    const data = rows.map(rec => ({
+        'ID': rec.id,
+        'Employee Number': rec.employee_number || '',
+        'Subject Code': rec.subject_code || '',
+        'Subject Description': rec.subject_description || '',
+        'Academic Term': rec.academic_term || '',
+        'Section': rec.schedule_section || '',
+        'Original Schedule': `${formatDate(rec.original_sched_date)} ${rec.original_sched_time || ''}`.trim(),
+        'Offset Schedule': `${formatDate(rec.offset_sched_date)} ${rec.offset_sched_time || ''}`.trim(),
+        'Reason': rec.reason || '',
+        'Prepared By': rec.prepaired_by || '',
+        'Submit Date': formatDate(rec.submit_date),
+        'Status': rec.status || ''
+    }));
+    const csv = buildCSV(headers, data);
+    downloadCSV(`offset_report_${new Date().toISOString().slice(0,10)}.csv`, csv);
+    showToast('Offset export downloaded.', 'success');
+}
+
+function exportRequestReport() {
+    const rows = filterRequestData();
+    if (!rows.length) {
+        showToast('No request form data available to export.', 'error');
+        return;
+    }
+    const headers = ['ID', 'Employee Number', 'Request Type', 'Reason', 'Prepared By', 'Submit Date', 'Status'];
+    const data = rows.map(req => ({
+        'ID': req.id,
+        'Employee Number': req.employee_number || '',
+        'Request Type': req.type || '',
+        'Reason': req.reason || '',
+        'Prepared By': req.prepared_by || '',
+        'Submit Date': formatDate(req.submit_date),
+        'Status': req.status || ''
+    }));
+    const csv = buildCSV(headers, data);
+    downloadCSV(`request_report_${new Date().toISOString().slice(0,10)}.csv`, csv);
+    showToast('Request export downloaded.', 'success');
 }
 
 // ============================================================
@@ -714,7 +798,7 @@ function setupOffsetEventListeners() {
         offsetSearchTerm = this.value;
         renderOffsetTable();
     });
-    document.getElementById('offsetExportBtn')?.addEventListener('click', () => showToast('Exporting offset report...', 'info'));
+    document.getElementById('offsetExportBtn')?.addEventListener('click', exportOffsetReport);
 }
 
 // ============================================================
@@ -897,5 +981,5 @@ function setupRequestEventListeners() {
         requestSearchTerm = this.value;
         renderRequestTable();
     });
-    document.getElementById('requestExportBtn')?.addEventListener('click', () => showToast('Exporting request report...', 'info'));
+    document.getElementById('requestExportBtn')?.addEventListener('click', exportRequestReport);
 }
