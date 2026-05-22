@@ -367,10 +367,7 @@ error_reporting(0);
             </div>
 
             <!-- FOOTER -->
-            <div class="footer">
-                <p>© 2024 BTech HRMS - Human Resource Management System</p>
-                <p>Version 2.2.0 | Leave Limit Enforcement Active</p>
-            </div>
+            <?php include("../components/footer.php"); ?>
         </main>
     </div>
 

@@ -519,10 +519,7 @@ $departments[] = [
             </div>
 
             <!-- FOOTER -->
-            <div class="footer">
-                <p>© 2024 BTech HRMS - Human Resource Management System</p>
-                <p>Version 2.1.0 | Last updated: October 2024</p>
-            </div>
+            <?php include("../components/footer.php"); ?>
         </main>
     </div>
 

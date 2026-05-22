@@ -693,11 +693,8 @@ if ($result && mysqli_num_rows($result) > 0) {
 </div>
             </div>
 
-            <!-- FOOTER - EXACT SAME AS LEAVE PAGE -->
-            <div class="footer">
-                <p>© 2024 BTech HRMS - Human Resource Management System</p>
-                <p>Version 2.1.0 | Last updated: October 2024</p>
-            </div>
+            <!-- FOOTER -->
+            <?php include("../components/footer.php"); ?>
         </main>
     </div>
 
