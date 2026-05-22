@@ -438,6 +438,26 @@ error_reporting(0);
 
 </body>
 <script src="../../js/admin/leave.js"></script>
+<!-- Reusable confirmation modal -->
+<div id="confirmModal" class="modal" style="display:none;">
+    <div class="modal-content confirm-modal">
+        <div class="modal-header">
+            <h3 id="confirmTitle"><i class="fas fa-question-circle"></i> Confirm Action</h3>
+            <button class="close-modal" onclick="document.getElementById('confirmModal').style.display='none'">&times;</button>
+        </div>
+        <div class="modal-body confirm-body">
+            <div id="confirmMessage" class="confirm-message"></div>
+            <div id="confirmInputWrapper" class="confirm-input-wrapper">
+                <label for="confirmReason" class="confirm-label">Reason</label>
+                <textarea id="confirmReason" class="confirm-textarea"></textarea>
+            </div>
+        </div>
+        <div class="modal-actions confirm-actions">
+            <button class="action-btn view-btn" id="confirmNo">Cancel</button>
+            <button class="action-btn approve-btn" id="confirmYes">Confirm</button>
+        </div>
+    </div>
+</div>
 <script>
     // ======================== MAIN TAB SWITCHING ========================
     const mainTabs = document.querySelectorAll('.main-tab');

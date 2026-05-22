@@ -29,6 +29,37 @@ const leaveDetailsContent   = document.getElementById('leaveDetailsContent');
 const leaveLimitInfo        = document.getElementById('leaveLimitInfo');
 const signaturePreview      = document.getElementById('signaturePreview');
 
+// Toast helper (same behaviour as dashboard): shows brief notifications
+function showToast(message, type = 'info', duration = 3000) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        Object.assign(container.style, {
+            position: 'fixed', right: '20px', top: '20px', zIndex: 99999,
+            display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end'
+        });
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    const bg = type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#34495e';
+    Object.assign(toast.style, {
+        background: bg, color: '#fff', padding: '10px 14px', borderRadius: '6px',
+        boxShadow: '0 6px 18px rgba(0,0,0,0.12)', opacity: '0', transform: 'translateY(-8px)',
+        transition: 'opacity 220ms ease, transform 220ms ease', maxWidth: '360px', fontSize: '14px'
+    });
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; });
+    setTimeout(() => {
+        toast.style.opacity = '0'; toast.style.transform = 'translateY(-8px)';
+        setTimeout(() => container.removeChild(toast), 300);
+    }, duration);
+}
+
 // ============================================================
 // OFFSET TAB - State
 // ============================================================
@@ -363,67 +394,82 @@ function approveLeaveRequest(requestId) {
     const req = leaveRequests.find(r => r.id === requestId);
     if (!req) return;
     const check = checkLeaveLimit(req);
-    if (check.exceeds && !confirm(`Warning: This request exceeds leave limit!\n\n${check.message}\n\nApprove anyway?`)) return;
-    if (!confirm(`Approve leave request ${requestId} for ${req.employee.name}?`)) return;
-    const fd = new FormData();
-    fd.append('request_id', requestId); fd.append('status', 'approved');
-    fd.append('employee_id', req.employee.id); fd.append('leave_type', req.leaveType); fd.append('days', req.days);
-    fetch('../../backendPHP/admin_leave/approve_leave.php', { method: 'POST', body: fd })
-        .then(r => r.json()).then(d => {
-            if (d.success) {
-                req.status = 'approved'; req.approvedBy = 'Admin'; req.approvedDate = today();
-                if (employeeLeaveUsage[req.employee.id]?.[req.leaveType]) {
-                    employeeLeaveUsage[req.employee.id][req.leaveType].used += req.days;
-                    employeeLeaveUsage[req.employee.id][req.leaveType].remaining -= req.days;
-                }
-                updateLeaveStats(); renderLeaveTable();
-                leaveDetailsModal.style.display = 'none'; currentLeave = null;
-                alert(`Leave request ${requestId} approved.`);
-            } else alert('Error: ' + d.message);
-        }).catch(() => alert('Error approving leave request'));
+    // replaced native confirm with modal-based confirmation
+    // async modal handled below via showConfirm
+    (async () => {
+        if (check.exceeds) {
+            const ok = await showConfirm(`Warning: This request exceeds leave limit!\n\n${check.message}\n\nApprove anyway?`);
+            if (!ok) return;
+        }
+        const ok2 = await showConfirm(`Approve leave request ${requestId} for ${req.employee.name}?`);
+        if (!ok2) return;
+
+        const fd = new FormData();
+        fd.append('request_id', requestId); fd.append('status', 'approved');
+        fd.append('employee_id', req.employee.id); fd.append('leave_type', req.leaveType); fd.append('days', req.days);
+        fetch('../../backendPHP/admin_leave/approve_leave.php', { method: 'POST', body: fd })
+            .then(r => r.json()).then(d => {
+                if (d.success) {
+                            req.status = 'approved'; req.approvedBy = 'Admin'; req.approvedDate = today();
+                            if (employeeLeaveUsage[req.employee.id]?.[req.leaveType]) {
+                                employeeLeaveUsage[req.employee.id][req.leaveType].used += req.days;
+                                employeeLeaveUsage[req.employee.id][req.leaveType].remaining -= req.days;
+                            }
+                            updateLeaveStats(); renderLeaveTable();
+                            leaveDetailsModal.style.display = 'none'; currentLeave = null;
+                            showToast(`Leave request ${requestId} approved.`, 'success');
+                        } else showToast('Error: ' + d.message, 'error');
+                    }).catch(() => showToast('Error approving leave request', 'error'));
+    })();
 }
 
 function denyLeaveRequest(requestId) {
     const req = leaveRequests.find(r => r.id === requestId);
     if (!req) return;
-    const reason = prompt('Please enter reason for denial:');
-    if (!reason) return;
-    const fd = new FormData();
-    fd.append('request_id', requestId); fd.append('status', 'denied'); fd.append('reason', reason);
-    fetch('../../backendPHP/admin_leave/update_leave_status.php', { method: 'POST', body: fd })
-        .then(r => r.json()).then(d => {
-            if (d.success) {
-                req.status = 'denied'; req.deniedBy = 'Admin'; req.deniedDate = today(); req.denialReason = reason;
-                updateLeaveStats(); renderLeaveTable();
-                leaveDetailsModal.style.display = 'none'; currentLeave = null;
-                alert(`Leave request ${requestId} denied.`);
-            } else alert('Error: ' + d.message);
-        }).catch(() => alert('Error denying leave request'));
+    (async () => {
+        const input = await showConfirm('Please enter reason for denial:', { showInput: true, inputPlaceholder: 'Denial reason' });
+        if (!input) return;
+        const fd = new FormData();
+        fd.append('request_id', requestId); fd.append('status', 'denied'); fd.append('reason', input);
+        fetch('../../backendPHP/admin_leave/update_leave_status.php', { method: 'POST', body: fd })
+            .then(r => r.json()).then(d => {
+                if (d.success) {
+                    req.status = 'denied'; req.deniedBy = 'Admin'; req.deniedDate = today(); req.denialReason = input;
+                    updateLeaveStats(); renderLeaveTable();
+                    leaveDetailsModal.style.display = 'none'; currentLeave = null;
+                    showToast(`Leave request ${requestId} denied.`, 'success');
+                } else showToast('Error: ' + d.message, 'error');
+            }).catch(() => showToast('Error denying leave request', 'error'));
+    })();
 }
 
 function overrideLeaveLimit(requestId) {
     const req = leaveRequests.find(r => r.id === requestId);
     if (!req) return;
     const check = checkLeaveLimit(req);
-    const OReason = prompt(`Enter reason for overriding leave limit:\n\n${check.message}\n\nOverride Reason:`);
-    if (!OReason || !confirm(`Override limit and approve ${requestId}?\n\nReason: ${OReason}`)) return;
-    const fd = new FormData();
-    fd.append('request_id', requestId); fd.append('status', 'approved');
-    fd.append('employee_id', req.employee.id); fd.append('leave_type', req.leaveType);
-    fd.append('days', req.days); fd.append('override_reason', OReason);
-    fetch('../../backendPHP/admin_leave/approve_leave.php', { method: 'POST', body: fd })
-        .then(r => r.json()).then(d => {
-            if (d.success) {
-                req.status = 'approved'; req.approvedBy = 'Admin (Override)'; req.approvedDate = today();
-                if (employeeLeaveUsage[req.employee.id]?.[req.leaveType]) {
-                    employeeLeaveUsage[req.employee.id][req.leaveType].used += req.days;
-                    employeeLeaveUsage[req.employee.id][req.leaveType].remaining -= req.days;
-                }
-                updateLeaveStats(); renderLeaveTable();
-                leaveDetailsModal.style.display = 'none'; currentLeave = null;
-                alert(`Leave request ${requestId} approved with limit override.`);
-            } else alert('Error: ' + d.message);
-        }).catch(() => alert('Error overriding leave request'));
+    (async () => {
+        const OReason = await showConfirm(`Enter reason for overriding leave limit:\n\n${check.message}\n\nOverride Reason:`, { showInput: true, inputPlaceholder: 'Override reason' });
+        if (!OReason) return;
+        const ok = await showConfirm(`Override limit and approve ${requestId}?\n\nReason: ${OReason}`);
+        if (!ok) return;
+        const fd = new FormData();
+        fd.append('request_id', requestId); fd.append('status', 'approved');
+        fd.append('employee_id', req.employee.id); fd.append('leave_type', req.leaveType);
+        fd.append('days', req.days); fd.append('override_reason', OReason);
+        fetch('../../backendPHP/admin_leave/approve_leave.php', { method: 'POST', body: fd })
+            .then(r => r.json()).then(d => {
+                if (d.success) {
+                    req.status = 'approved'; req.approvedBy = 'Admin (Override)'; req.approvedDate = today();
+                    if (employeeLeaveUsage[req.employee.id]?.[req.leaveType]) {
+                        employeeLeaveUsage[req.employee.id][req.leaveType].used += req.days;
+                        employeeLeaveUsage[req.employee.id][req.leaveType].remaining -= req.days;
+                    }
+                    updateLeaveStats(); renderLeaveTable();
+                    leaveDetailsModal.style.display = 'none'; currentLeave = null;
+                    showToast(`Leave request ${requestId} approved with limit override.`, 'success');
+                } else showToast('Error: ' + d.message, 'error');
+            }).catch(() => showToast('Error overriding leave request', 'error'));
+    })();
 }
 
 function today() { return new Date().toISOString().split('T')[0]; }
@@ -445,7 +491,7 @@ function setupLeaveEventListeners() {
     configureLimitsBtn?.addEventListener('click', () => {
         let txt = 'Leave Limit Configuration\n\n';
         for (const t in leaveLimits) txt += `${t}: ${leaveLimits[t].maxDays} ${leaveLimits[t].description}\n`;
-        alert(txt);
+        showToast(txt, 'info', 5000);
     });
     searchInput?.addEventListener('input', () => { currentSearch = searchInput.value; renderLeaveTable(); });
     filterTabs.forEach(tab => tab.addEventListener('click', function () {
@@ -454,7 +500,7 @@ function setupLeaveEventListeners() {
         currentFilter = this.dataset.status;
         renderLeaveTable();
     }));
-    document.getElementById('leaveExportBtn')?.addEventListener('click', () => alert('Exporting leave report...'));
+    document.getElementById('leaveExportBtn')?.addEventListener('click', () => showToast('Exporting leave report...', 'info'));
 }
 
 // ============================================================
@@ -556,12 +602,13 @@ function addOffsetTableListeners() {
     document.querySelectorAll('.offset-view-btn').forEach(btn =>
         btn.addEventListener('click', () => showOffsetDetails(btn.dataset.id)));
     document.querySelectorAll('.offset-approve-btn').forEach(btn =>
-        btn.addEventListener('click', () => {
-            if (confirm(`Approve offset record #${btn.dataset.id}?`)) updateOffsetStatus(btn.dataset.id, 'approved');
+        btn.addEventListener('click', async () => {
+            const ok = await showConfirm(`Approve offset record #${btn.dataset.id}?`);
+            if (ok) updateOffsetStatus(btn.dataset.id, 'approved');
         }));
     document.querySelectorAll('.offset-deny-btn').forEach(btn =>
-        btn.addEventListener('click', () => {
-            const reason = prompt('Enter reason for rejection:');
+        btn.addEventListener('click', async () => {
+            const reason = await showConfirm('Enter reason for rejection:', { showInput: true, inputPlaceholder: 'Rejection reason' });
             if (reason) updateOffsetStatus(btn.dataset.id, 'rejected', reason);
         }));
 }
@@ -598,12 +645,46 @@ function showOffsetDetails(id) {
         <div class="detail-item"><span class="detail-label">Submit Date</span>
             <div class="detail-value">${formatDate(o.submit_date)}</div></div>
     `;
-    document.getElementById('approveOffsetBtn').onclick = () => { if (confirm(`Approve offset #${o.id}?`)) updateOffsetStatus(o.id, 'approved'); };
-    document.getElementById('denyOffsetBtn').onclick    = () => {
-        const r = prompt('Enter reason for rejection:');
-        if (r) updateOffsetStatus(o.id, 'rejected', r);
+    document.getElementById('approveOffsetBtn').onclick = async () => {
+        const ok = await showConfirm(`Approve offset #${o.id}?`);
+        if (ok) updateOffsetStatus(o.id, 'approved');
+    };
+    document.getElementById('denyOffsetBtn').onclick    = async () => {
+        const reason = await showConfirm('Enter reason for rejection:', { showInput: true, inputPlaceholder: 'Rejection reason' });
+        if (reason) updateOffsetStatus(o.id, 'rejected', reason);
     };
     document.getElementById('offsetDetailsModal').style.display = 'flex';
+}
+
+// Modal-based confirmation helper. Returns `true` or `false`, or a string when input is enabled.
+function showConfirm(message, options = {}) {
+    const { showInput = false, inputPlaceholder = '' } = options;
+    const modal = document.getElementById('confirmModal');
+    const msgEl = document.getElementById('confirmMessage');
+    const inputWrapper = document.getElementById('confirmInputWrapper');
+    const inputEl = document.getElementById('confirmReason');
+    const yesBtn = document.getElementById('confirmYes');
+    const noBtn = document.getElementById('confirmNo');
+
+    return new Promise(resolve => {
+        if (!modal || !msgEl || !yesBtn || !noBtn) return resolve(false);
+        msgEl.textContent = message;
+        inputWrapper.style.display = showInput ? 'block' : 'none';
+        inputEl.placeholder = inputPlaceholder;
+        inputEl.value = '';
+        modal.style.display = 'flex';
+
+        function cleanup() {
+            yesBtn.removeEventListener('click', onYes);
+            noBtn.removeEventListener('click', onNo);
+            modal.style.display = 'none';
+        }
+        function onYes() { const val = showInput ? inputEl.value.trim() : true; cleanup(); resolve(val); }
+        function onNo()  { cleanup(); resolve(false); }
+
+        yesBtn.addEventListener('click', onYes);
+        noBtn.addEventListener('click', onNo);
+    });
 }
 
 function updateOffsetStatus(id, status, reason = '') {
@@ -620,20 +701,20 @@ function updateOffsetStatus(id, status, reason = '') {
                 if (rec) rec.status = status;
                 document.getElementById('offsetDetailsModal').style.display = 'none';
                 renderOffsetTable();
-                alert(`Offset #${id} has been ${status}.`);
+                showToast(`Offset #${id} has been ${status}.`, 'success');
             } else {
                 // ✅ Check both d.message and d.error
-                alert('Error: ' + (d.message || d.error || 'Unknown error'));
+                showToast('Error: ' + (d.message || d.error || 'Unknown error'), 'error');
             }
         })
-        .catch(err => alert('Error updating offset status: ' + err));
+        .catch(err => showToast('Error updating offset status: ' + err, 'error'));
 }
 function setupOffsetEventListeners() {
     document.getElementById('offsetSearchInput')?.addEventListener('input', function () {
         offsetSearchTerm = this.value;
         renderOffsetTable();
     });
-    document.getElementById('offsetExportBtn')?.addEventListener('click', () => alert('Exporting offset report...'));
+    document.getElementById('offsetExportBtn')?.addEventListener('click', () => showToast('Exporting offset report...', 'info'));
 }
 
 // ============================================================
@@ -754,12 +835,13 @@ function addRequestTableListeners() {
     document.querySelectorAll('.request-view-btn').forEach(btn =>
         btn.addEventListener('click', () => showRequestDetails(btn.dataset.id)));
     document.querySelectorAll('.request-approve-btn').forEach(btn =>
-        btn.addEventListener('click', () => {
-            if (confirm(`Approve request form #${btn.dataset.id}?`)) updateRequestStatus(btn.dataset.id, 'approved');
+        btn.addEventListener('click', async () => {
+            const ok = await showConfirm(`Approve request form #${btn.dataset.id}?`);
+            if (ok) updateRequestStatus(btn.dataset.id, 'approved');
         }));
     document.querySelectorAll('.request-deny-btn').forEach(btn =>
-        btn.addEventListener('click', () => {
-            const reason = prompt('Enter reason for rejection:');
+        btn.addEventListener('click', async () => {
+            const reason = await showConfirm('Enter reason for rejection:', { showInput: true, inputPlaceholder: 'Rejection reason' });
             if (reason) updateRequestStatus(btn.dataset.id, 'rejected', reason);
         }));
 }
@@ -782,11 +864,8 @@ function showRequestDetails(id) {
         <div class="detail-item" style="grid-column: span 2;"><span class="detail-label">Reason</span>
             <div class="detail-value">${req.reason || '—'}</div></div>
     `;
-    document.getElementById('approveRequestBtn').onclick = () => { if (confirm(`Approve request #${req.id}?`)) updateRequestStatus(req.id, 'approved'); };
-    document.getElementById('denyRequestBtn').onclick    = () => {
-        const r = prompt('Enter reason for rejection:');
-        if (r) updateRequestStatus(req.id, 'rejected', r);
-    };
+    document.getElementById('approveRequestBtn').onclick = async () => { const ok = await showConfirm(`Approve request #${req.id}?`); if (ok) updateRequestStatus(req.id, 'approved'); };
+    document.getElementById('denyRequestBtn').onclick    = async () => { const r = await showConfirm('Enter reason for rejection:', { showInput: true, inputPlaceholder: 'Rejection reason' }); if (r) updateRequestStatus(req.id, 'rejected', r); };
     document.getElementById('requestDetailsModal').style.display = 'flex';
 }
 
@@ -804,13 +883,13 @@ function updateRequestStatus(id, status, reason = '') {
                 if (rec) rec.status = status;
                 document.getElementById('requestDetailsModal').style.display = 'none';
                 renderRequestTable();
-                alert(`Request #${id} has been ${status}.`);
+                showToast(`Request #${id} has been ${status}.`, 'success');
             } else {
                 // ✅ fallback handles both 'message' and 'error' keys
-                alert('Error: ' + (d.message || d.error || 'Unknown error'));
+                showToast('Error: ' + (d.message || d.error || 'Unknown error'), 'error');
             }
         })
-        .catch(err => alert('Error updating request status: ' + err));
+        .catch(err => showToast('Error updating request status: ' + err, 'error'));
 }
 
 function setupRequestEventListeners() {
@@ -818,5 +897,5 @@ function setupRequestEventListeners() {
         requestSearchTerm = this.value;
         renderRequestTable();
     });
-    document.getElementById('requestExportBtn')?.addEventListener('click', () => alert('Exporting request report...'));
+    document.getElementById('requestExportBtn')?.addEventListener('click', () => showToast('Exporting request report...', 'info'));
 }
