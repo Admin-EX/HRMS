@@ -770,6 +770,24 @@ function showNotificationSummary() {
     );
 }
 
+function exportEmployeeReport() {
+    const params = new URLSearchParams();
+    const employeeType = currentFilter || 'all';
+    const credential = currentCredentialFilter || '';
+    const search = searchInput ? searchInput.value.trim() : '';
+
+    params.append('employee_type', employeeType);
+    if (credential) {
+        params.append('credential', credential);
+    }
+    if (search) {
+        params.append('search', search);
+    }
+
+    const url = `../../backendPHP/export_employee_report.php?${params.toString()}`;
+    window.location.href = url;
+}
+
 // ============================================================================
 // EVENT LISTENERS SETUP
 // ============================================================================
@@ -810,7 +828,7 @@ function setupEventListeners() {
     // Export button
     if (exportButton) {
         exportButton.addEventListener('click', () => {
-            alert('Exporting employee report...\n\nThis would generate and download an Excel/PDF report of all employee data.');
+            exportEmployeeReport();
         });
     }
 
