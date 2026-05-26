@@ -93,16 +93,20 @@ function initForgotPassword() {
   // });
 
   // Close modal
-  closeModal.addEventListener('click', () => {
-    forgotPasswordModal.style.display = 'none';
-  });
+  if (closeModal && forgotPasswordModal) {
+    closeModal.addEventListener('click', () => {
+      forgotPasswordModal.style.display = 'none';
+    });
+  }
 
   // Close modal when clicking outside
-  forgotPasswordModal.addEventListener('click', (e) => {
-    if (e.target === forgotPasswordModal) {
-      forgotPasswordModal.style.display = 'none';
-    }
-  });
+  if (forgotPasswordModal) {
+    forgotPasswordModal.addEventListener('click', (e) => {
+      if (e.target === forgotPasswordModal) {
+        forgotPasswordModal.style.display = 'none';
+      }
+    });
+  }
 
   // OTP input navigation
   otpInputs.forEach((input, index) => {
@@ -131,19 +135,19 @@ function initForgotPassword() {
   });
 
   // Password strength checker
-  newPassword.addEventListener('input', checkPasswordStrength);
+  if (newPassword) newPassword.addEventListener('input', checkPasswordStrength);
 
   // Back button
-  backBtn.addEventListener('click', goBack);
+  if (backBtn) backBtn.addEventListener('click', goBack);
 
   // Next button
-  nextBtn.addEventListener('click', goNext);
+  if (nextBtn) nextBtn.addEventListener('click', goNext);
 
   // Submit button
-  submitBtn.addEventListener('click', submitNewPassword);
+  if (submitBtn) submitBtn.addEventListener('click', submitNewPassword);
 
   // Resend OTP
-  resendOTPLink.addEventListener('click', resendOTP);
+  if (resendOTPLink) resendOTPLink.addEventListener('click', resendOTP);
 
   // Enter key on login inputs should submit login
   const loginInputs = [document.getElementById('employeeNumber'), document.getElementById('password')];
@@ -159,7 +163,7 @@ function initForgotPassword() {
   });
 
   // Login button
-  loginBtn.addEventListener("click", function () {
+  if (loginBtn) loginBtn.addEventListener("click", function () {
     const employeeNumber = document.getElementById("employeeNumber").value;
     const password = document.getElementById("password").value;
 
@@ -213,17 +217,17 @@ function initForgotPassword() {
   });
 }
 
-// Reset forgot password flow
+  // Reset forgot password flow
 function resetForgotPassword() {
   currentStep = 1;
   updateSteps();
 
   // Reset all inputs
-  verifyEmployeeNumber.value = '';
-  recoveryEmail.value = '';
-  newPassword.value = '';
-  confirmPassword.value = '';
-  otpInputs.forEach(input => input.value = '');
+  if (verifyEmployeeNumber) verifyEmployeeNumber.value = '';
+  if (recoveryEmail) recoveryEmail.value = '';
+  if (newPassword) newPassword.value = '';
+  if (confirmPassword) confirmPassword.value = '';
+  otpInputs.forEach(input => { if (input) input.value = ''; });
 
   // Reset errors
   hideAllErrors();
@@ -231,8 +235,8 @@ function resetForgotPassword() {
   // Reset OTP timer
   clearInterval(timerInterval);
   timerSeconds = 300;
-  updateTimer();
-  resendOTPLink.classList.add('disabled');
+  if (typeof updateTimer === 'function') updateTimer();
+  if (resendOTPLink) resendOTPLink.classList.add('disabled');
   canResendOTP = false;
 
   // Reset buttons

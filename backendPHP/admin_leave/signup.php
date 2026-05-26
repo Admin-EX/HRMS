@@ -1,38 +1,65 @@
 <?php
-include "../database/connection.php";
+include "../../database/connection.php";
 
 $message = "";
+$messageType = "success";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $employeeNumber = trim($_POST['employeeNumber'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirmPassword'] ?? '';
 
-    $firstName = $_POST['firstName'];
-    $lastName  = $_POST['lastName'];
-    $employeeNumber = $_POST['employeeNumber'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $confirmPassword = $_POST['confirmPassword'];
-    $gender = $_POST['gender'];
-    $birthday = $_POST['birthday'];
-
-    if($password != $confirmPassword){
+    if ($employeeNumber === '' || $email === '' || $password === '' || $confirmPassword === '') {
+        $messageType = 'error';
+        $message = "All fields are required.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $messageType = 'error';
+        $message = "Please enter a valid email address.";
+    } elseif ($password !== $confirmPassword) {
+        $messageType = 'error';
         $message = "Passwords do not match.";
-    }else{
+    } else {
+        $checkSql = "SELECT employee_number, email FROM users WHERE employee_number = ? OR email = ? LIMIT 1";
+        $checkStmt = mysqli_prepare($connection, $checkSql);
 
-        $password = md5($password);
+        if (!$checkStmt) {
+            $messageType = 'error';
+            $message = "Database error. Please try again later.";
+        } else {
+            mysqli_stmt_bind_param($checkStmt, "ss", $employeeNumber, $email);
+            mysqli_stmt_execute($checkStmt);
+            $result = mysqli_stmt_get_result($checkStmt);
 
-        $sql = "INSERT INTO users 
-        (first_name,last_name,employee_number,email,password,gender,birthday,role)
-        VALUES (?,?,?,?,?,?,?,'employee')";
+            if ($existing = mysqli_fetch_assoc($result)) {
+                $messageType = 'error';
+                if ($existing['employee_number'] === $employeeNumber) {
+                    $message = "Employee number already exists.";
+                } else {
+                    $message = "Email address already exists.";
+                }
+            } else {
+                $passwordHash = md5($password);
+                $sql = "INSERT INTO users (employee_number, email, password, role) VALUES (?, ?, ?, 'employee')";
+                $stmt = mysqli_prepare($connection, $sql);
 
-        $stmt = mysqli_prepare($connection,$sql);
+                if (!$stmt) {
+                    $messageType = 'error';
+                    $message = "Database error. Please try again later.";
+                } else {
+                    mysqli_stmt_bind_param($stmt, "sss", $employeeNumber, $email, $passwordHash);
+                    if (mysqli_stmt_execute($stmt)) {
+                        $messageType = 'success';
+                        $message = "Account created successfully! You can now log in.";
+                    } else {
+                        $messageType = 'error';
+                        $message = "Error creating account. Please try again.";
+                    }
+                    mysqli_stmt_close($stmt);
+                }
+            }
 
-        mysqli_stmt_bind_param($stmt,"sssssss",
-        $firstName,$lastName,$employeeNumber,$email,$password,$gender,$birthday);
-
-        if(mysqli_stmt_execute($stmt)){
-            $message = "Account created successfully!";
-        }else{
-            $message = "Error creating account.";
+            mysqli_stmt_close($checkStmt);
         }
     }
 }
@@ -115,20 +142,12 @@ color:green;
 <h2>Create Account</h2>
 
 <?php if($message!=""){ ?>
-<div class="message"><?php echo $message; ?></div>
+<div class="message" style="color: <?php echo $messageType === 'success' ? '#155724' : '#721c24'; ?>; background: <?php echo $messageType === 'success' ? '#d4edda' : '#f8d7da'; ?>; border: 1px solid <?php echo $messageType === 'success' ? '#c3e6cb' : '#f5c6cb'; ?>; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+    <?php echo htmlspecialchars($message); ?>
+</div>
 <?php } ?>
 
 <form method="POST">
-
-<div class="input-box">
-<label>First Name</label>
-<input type="text" name="firstName" required>
-</div>
-
-<div class="input-box">
-<label>Last Name</label>
-<input type="text" name="lastName" required>
-</div>
 
 <div class="input-box">
 <label>Employee Number</label>
@@ -148,20 +167,6 @@ color:green;
 <div class="input-box">
 <label>Confirm Password</label>
 <input type="password" name="confirmPassword" required>
-</div>
-
-<div class="input-box">
-<label>Gender</label>
-<select name="gender">
-<option value="">Select</option>
-<option>Male</option>
-<option>Female</option>
-</select>
-</div>
-
-<div class="input-box">
-<label>Birthday</label>
-<input type="date" name="birthday">
 </div>
 
 <button type="submit">Sign Up</button>
