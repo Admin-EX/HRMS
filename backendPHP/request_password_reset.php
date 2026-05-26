@@ -57,7 +57,19 @@ function url_path_join(...$parts) {
 }
 $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
 $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+
+// Build a reset path robustly. Prefer Referer when available (preserves any subdirectory
+// like /public_html/ used in local dev). Fall back to path built from this script's
+// SCRIPT_NAME when Referer is not present.
 $resetPath = url_path_join($scriptDir, '..', 'php', 'user', 'reset_password.php');
+if (!empty($_SERVER['HTTP_REFERER'])) {
+    $ref = $_SERVER['HTTP_REFERER'];
+    $u = parse_url($ref);
+    $refPath = $u['path'] ?? '';
+    if ($refPath !== '') {
+        $resetPath = url_path_join(dirname($refPath), 'reset_password.php');
+    }
+}
 $resetLink = $scheme . '://' . $_SERVER['HTTP_HOST'] . $resetPath . '?token=' . $token;
 
 $autoload = __DIR__ . '/../vendor/autoload.php';

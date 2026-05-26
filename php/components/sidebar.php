@@ -3,6 +3,7 @@
 // Get admin info from session
 $admin_name = $_SESSION['admin_name'] ?? 'Admin';
 $admin_role = $_SESSION['admin_role'] ?? 'Super Admin';
+$session_role = $_SESSION['role'] ?? '';
 
 // Get current page for active state
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -31,8 +32,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="analytics.php" class="<?php echo ($current_page == 'analytics.php') ? 'active' : ''; ?>">
             <i class="fas fa-chart-bar"></i> Analytics
         </a>
-                <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
-            <i class="fas fa-chart-bar"></i> Logout
+        <?php if ($session_role === 'super_admin'): ?>
+            <a href="account_manager.php" class="<?php echo ($current_page == 'account_manager.php') ? 'active' : ''; ?>">
+                <i class="fas fa-user-cog"></i> Account Manager
+            </a>
+        <?php endif; ?>
+        <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
+            <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </nav>
 

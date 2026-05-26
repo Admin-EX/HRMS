@@ -21,7 +21,14 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 if ($user = mysqli_fetch_assoc($result)) {
-
+    if (($user['status'] ?? 'active') !== 'active') {
+        echo json_encode([
+            "status" => "error",
+            "message" => "Account is inactive. Please contact your administrator."
+        ]);
+        mysqli_close($connection);
+        exit;
+    }
 
     if (md5($password) === $user['password']) {
         $role = strtolower(trim($user['role'] ?? 'employee'));
