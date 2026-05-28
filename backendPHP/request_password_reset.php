@@ -81,8 +81,8 @@ if (file_exists($autoload)) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'mostdevil24@gmail.com';
-        $mail->Password = 'bkvx rpin tlfi svpl';
+        $mail->Username = 'Email here';
+        $mail->Password = 'password here';
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
