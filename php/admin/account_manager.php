@@ -10,6 +10,11 @@ if (empty($_SESSION['loggedUser']) || ($_SESSION['role'] ?? '') !== 'super_admin
 $page_title = 'Account Manager';
 $page_description = 'Manage HRMS user accounts and roles.';
 
+// Check if a super_admin already exists (to enforce single-superadmin rule)
+$saRes = mysqli_query($connection, "SELECT COUNT(*) AS cnt FROM users WHERE role = 'super_admin'");
+$saRow = $saRes ? mysqli_fetch_assoc($saRes) : null;
+$superAdminCount = isset($saRow['cnt']) ? (int)$saRow['cnt'] : 0;
+
 // read flash message (POST-Redirect-Get)
 $message = '';
 $messageType = 'success';
@@ -25,6 +30,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'update_role' && in_array($_POST['new_role'] ?? '', ['employee', 'admin', 'super_admin'], true)) {
         $newRole = $_POST['new_role'];
         if ($target !== $_SESSION['loggedUser']) {
+            // Server-side enforce single super_admin: if attempting to set role to super_admin,
+            // disallow if another super_admin exists (excluding the target itself).
+            if ($newRole === 'super_admin') {
+                $countStmt = mysqli_prepare($connection, "SELECT COUNT(*) AS cnt FROM users WHERE role = 'super_admin' AND employee_number <> ?");
+                if ($countStmt) {
+                    mysqli_stmt_bind_param($countStmt, 's', $target);
+                    mysqli_stmt_execute($countStmt);
+                    mysqli_stmt_bind_result($countStmt, $existingSa);
+                    mysqli_stmt_fetch($countStmt);
+                    $existingSa = isset($existingSa) ? (int)$existingSa : 0;
+                    mysqli_stmt_close($countStmt);
+                    if ($existingSa > 0) {
+                        $_SESSION['flash_message'] = 'A super admin already exists. Only one super admin is allowed.';
+                        $_SESSION['flash_type'] = 'error';
+                        header('Location: ' . $_SERVER['PHP_SELF']);
+                        exit;
+                    }
+                }
+            }
+
             $stmt = mysqli_prepare($connection, "UPDATE users SET role = ? WHERE employee_number = ?");
             if ($stmt) {
                 mysqli_stmt_bind_param($stmt, 'ss', $newRole, $target);
@@ -65,11 +90,154 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_close($stmt);
         }
     } else {
-        if ($action !== '') {
-            $_SESSION['flash_message'] = 'Invalid account action.';
+        // Approve or reject pending registrations
+        if ($action === 'approve_registration') {
+            $regId = isset($_POST['registration_id']) ? (int)$_POST['registration_id'] : 0;
+            if ($regId <= 0) {
+                $_SESSION['flash_message'] = 'Invalid registration selected.';
+                $_SESSION['flash_type'] = 'error';
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit;
+            }
+
+            // fetch pending registration
+            $pstmt = mysqli_prepare($connection, 'SELECT email, password FROM pending_registrations WHERE id = ? LIMIT 1');
+            if ($pstmt) {
+                mysqli_stmt_bind_param($pstmt, 'i', $regId);
+                mysqli_stmt_execute($pstmt);
+                $pres = mysqli_stmt_get_result($pstmt);
+                $prow = $pres ? mysqli_fetch_assoc($pres) : null;
+                mysqli_stmt_close($pstmt);
+
+                if (!$prow) {
+                    $_SESSION['flash_message'] = 'Pending registration not found.';
+                    $_SESSION['flash_type'] = 'error';
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit;
+                }
+
+                $email = $prow['email'];
+                $passwordHash = $prow['password'];
+
+                // generate a unique employee number (EMP + 6 digits)
+                $attempts = 0;
+                $empNumber = '';
+                while ($attempts < 6) {
+                    $candidate = 'EMP' . str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                    $check = mysqli_prepare($connection, 'SELECT id FROM users WHERE employee_number = ? LIMIT 1');
+                    if ($check) {
+                        mysqli_stmt_bind_param($check, 's', $candidate);
+                        mysqli_stmt_execute($check);
+                        $cres = mysqli_stmt_get_result($check);
+                        $exists = $cres && mysqli_fetch_assoc($cres);
+                        mysqli_stmt_close($check);
+                        if (!$exists) { $empNumber = $candidate; break; }
+                    }
+                    $attempts++;
+                }
+
+                if ($empNumber === '') {
+                    $_SESSION['flash_message'] = 'Unable to generate employee number. Try again later.';
+                    $_SESSION['flash_type'] = 'error';
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit;
+                }
+
+                // insert into users
+                $ins = mysqli_prepare($connection, "INSERT INTO users (employee_number, email, password, role, status) VALUES (?, ?, ?, 'employee', 'active')");
+                if ($ins) {
+                    mysqli_stmt_bind_param($ins, 'sss', $empNumber, $email, $passwordHash);
+                    if (mysqli_stmt_execute($ins)) {
+                        // remove pending registration
+                        $del = mysqli_prepare($connection, 'DELETE FROM pending_registrations WHERE id = ?');
+                        if ($del) {
+                            mysqli_stmt_bind_param($del, 'i', $regId);
+                            mysqli_stmt_execute($del);
+                            mysqli_stmt_close($del);
+                        }
+
+                        // Send notification email with employee id
+                        $emailSent = false;
+                        $autoload = __DIR__ . '/../../vendor/autoload.php';
+                        if (file_exists($autoload)) {
+                            require_once $autoload;
+                            try {
+                                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                                $mail->isSMTP();
+                                $mail->Host = 'smtp.gmail.com';
+                                $mail->SMTPAuth = true;
+                                $mail->Username = 'mostdevil24@gmail.com';
+                                $mail->Password = 'bkvx rpin tlfi svpl';
+                                $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                                $mail->Port = 587;
+                                $mail->setFrom('mostdevil24@gmail.com', 'BTech HRMS');
+                                $mail->addAddress($email);
+                                $mail->Subject = 'BTech HRMS Account Approved';
+                                $mail->Body = "Congratulations, you have been accepted. Your Employee Id: $empNumber";
+                                $mail->send();
+                                $emailSent = true;
+                            } catch (Exception $e) {
+                                $emailSent = false;
+                            }
+                        }
+
+                        if ($emailSent) {
+                            $_SESSION['flash_message'] = 'Registration approved. Employee number: ' . $empNumber . '. An email has been sent.';
+                        } else {
+                            $_SESSION['flash_message'] = 'Registration approved. Employee number: ' . $empNumber . '. Unable to send email.';
+                        }
+                        $_SESSION['flash_type'] = 'success';
+                        header('Location: ' . $_SERVER['PHP_SELF']);
+                        exit;
+                    } else {
+                        $_SESSION['flash_message'] = 'Unable to create user account.';
+                        $_SESSION['flash_type'] = 'error';
+                        header('Location: ' . $_SERVER['PHP_SELF']);
+                        exit;
+                    }
+                    mysqli_stmt_close($ins);
+                } else {
+                    $_SESSION['flash_message'] = 'Database error. Please try again later.';
+                    $_SESSION['flash_type'] = 'error';
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit;
+                }
+            } else {
+                $_SESSION['flash_message'] = 'Database error. Please try again later.';
+                $_SESSION['flash_type'] = 'error';
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit;
+            }
+        } elseif ($action === 'reject_registration') {
+            $regId = isset($_POST['registration_id']) ? (int)$_POST['registration_id'] : 0;
+            if ($regId <= 0) {
+                $_SESSION['flash_message'] = 'Invalid registration selected.';
+                $_SESSION['flash_type'] = 'error';
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit;
+            }
+            $del = mysqli_prepare($connection, 'DELETE FROM pending_registrations WHERE id = ?');
+            if ($del) {
+                mysqli_stmt_bind_param($del, 'i', $regId);
+                if (mysqli_stmt_execute($del)) {
+                    $_SESSION['flash_message'] = 'Registration rejected and removed.';
+                    $_SESSION['flash_type'] = 'success';
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit;
+                }
+                mysqli_stmt_close($del);
+            }
+            $_SESSION['flash_message'] = 'Unable to reject registration.';
             $_SESSION['flash_type'] = 'error';
             header('Location: ' . $_SERVER['PHP_SELF']);
             exit;
+        } else {
+            if ($action !== '') {
+                $_SESSION['flash_message'] = 'Invalid account action.';
+                $_SESSION['flash_type'] = 'error';
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit;
+            }
         }
     }
 }
@@ -78,6 +246,22 @@ $result = mysqli_query($connection, "SELECT employee_number, email, role, status
 $accounts = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $accounts[] = $row;
+}
+
+// Fetch pending registrations for admin approval
+$pendingRegs = [];
+$createPending = "CREATE TABLE IF NOT EXISTS pending_registrations (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+mysqli_query($connection, $createPending);
+
+$pr = mysqli_query($connection, "SELECT id, email, created_at FROM pending_registrations ORDER BY created_at ASC");
+if ($pr) {
+    while ($r = mysqli_fetch_assoc($pr)) { $pendingRegs[] = $r; }
 }
 
 ?>
@@ -163,6 +347,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                                 <h2>All Accounts</h2>
                                 <p>Only the super admin can view and manage these users.</p>
                             </div>
+                            <div>
+                                <button id="openPendingBtn" class="view-btn">Pending Registrations (<?php echo count($pendingRegs); ?>)</button>
+                            </div>
                         </div>
                     </header>
                     <div class="search-filters-container">
@@ -199,9 +386,49 @@ while ($row = mysqli_fetch_assoc($result)) {
                     </div>
         </main>
     </div>
+    <!-- Pending Registrations Modal -->
+    <div id="pendingModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:120000; justify-content:center; align-items:center;">
+        <div style="background:#fff; width:760px; max-width:95%; border-radius:10px; padding:18px; box-shadow:0 18px 40px rgba(0,0,0,0.3);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <strong>Pending Registrations</strong>
+                <button id="closePending" style="background:none;border:none;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <div style="max-height:400px; overflow:auto;">
+                <?php if (count($pendingRegs) === 0): ?>
+                    <div style="padding:20px; text-align:center; color:#555;">No pending registrations.</div>
+                <?php else: ?>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #eee;">Email</th><th style="padding:8px;border-bottom:1px solid #eee;">Requested</th><th style="padding:8px;border-bottom:1px solid #eee;">Actions</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($pendingRegs as $prg): ?>
+                            <tr>
+                                <td style="padding:10px;border-bottom:1px solid #f3f3f3;"><?php echo htmlspecialchars($prg['email']); ?></td>
+                                <td style="padding:10px;border-bottom:1px solid #f3f3f3;"><?php echo htmlspecialchars($prg['created_at']); ?></td>
+                                <td style="padding:10px;border-bottom:1px solid #f3f3f3;">
+                                    <form method="POST" style="display:inline-block; margin-right:8px;">
+                                        <input type="hidden" name="action" value="approve_registration">
+                                        <input type="hidden" name="registration_id" value="<?php echo (int)$prg['id']; ?>">
+                                        <button type="submit" class="view-btn">Approve</button>
+                                    </form>
+                                    <form method="POST" style="display:inline-block;" onsubmit="return confirm('Reject this registration?');">
+                                        <input type="hidden" name="action" value="reject_registration">
+                                        <input type="hidden" name="registration_id" value="<?php echo (int)$prg['id']; ?>">
+                                        <button type="submit" class="deny-btn">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
     <script>
         const accountToastMessage = <?php echo json_encode($message); ?>;
         const accountToastType = <?php echo json_encode($messageType); ?>;
+        // Allow selecting super_admin only if none exists yet
+        const allowSuperAdmin = <?php echo json_encode($superAdminCount === 0); ?>;
 
         function showTopLeftToast(message, duration = 3000) {
             if (!message) return;
@@ -284,7 +511,8 @@ while ($row = mysqli_fetch_assoc($result)) {
             if (acc.employee_number === me) return `<span style="color:#555; font-size:0.95rem;">Current user</span>`;
             // role form
             const selectedEmployee = escapeHtml(acc.employee_number);
-            const roleOptions = ['employee','admin','super_admin'].map(r => `<option value="${r}" ${acc.role===r? 'selected':''}>${capitalize(r.replace('_',' '))}</option>`).join('');
+            const rolesList = allowSuperAdmin ? ['employee','admin','super_admin'] : ['employee','admin'];
+            const roleOptions = rolesList.map(r => `<option value="${r}" ${acc.role===r? 'selected':''}>${capitalize(r.replace('_',' '))}</option>`).join('');
             const actionHtml = `
                 <div class="action-buttons">
                     <form method="POST">
@@ -390,6 +618,13 @@ while ($row = mysqli_fetch_assoc($result)) {
 
         // close on Esc
         document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modalOverlay.style.display === 'flex') { pendingForm = null; modalOverlay.style.display = 'none'; } });
+        // Pending registrations modal handlers
+        const openPendingBtn = document.getElementById('openPendingBtn');
+        const pendingModal = document.getElementById('pendingModal');
+        const closePending = document.getElementById('closePending');
+        if (openPendingBtn && pendingModal) openPendingBtn.addEventListener('click', ()=>{ pendingModal.style.display='flex'; });
+        if (closePending && pendingModal) closePending.addEventListener('click', ()=>{ pendingModal.style.display='none'; });
+        if (pendingModal) pendingModal.addEventListener('click', (e)=>{ if (e.target === pendingModal) pendingModal.style.display='none'; });
     </script>
 </body>
 </html>

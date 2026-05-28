@@ -21,6 +21,6 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-// Redirect to root index
-header("Location: ../../index.html");
+// Redirect to user login page
+header("Location: ../user/index.php");
 exit();
