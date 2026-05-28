@@ -4,7 +4,14 @@ session_start();
 $signupMessage = "";
 $signupMessageType = "success";
 $registrationCompleted = (isset($_GET['registered']) && $_GET['registered'] === '1');
+$registrationPending = (isset($_GET['pending']) && $_GET['pending'] === '1');
 $resetCompleted = (isset($_GET['reset']) && $_GET['reset'] === '1');
+$signupMessage = $signupMessage; // keep existing
+if ($registrationPending) {
+  $signupMessageType = 'success';
+  $signupMessage = 'Thank you for registering. Please check your email or contact HR to confirm your registration.';
+  $activeTab = 'login';
+}
 $signupValues = [
     'employeeNumber' => '',
     'email' => ''
@@ -50,16 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $connection = null;
         include '../../database/connection.php';
 
-        $employeeNumber = trim($_POST['employeeNumber'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirmPassword'] ?? '';
 
-        $signupValues['employeeNumber'] = htmlspecialchars($employeeNumber);
         $signupValues['email'] = htmlspecialchars($email);
         $activeTab = 'signup';
 
-        if ($employeeNumber === '' || $email === '' || $password === '' || $confirmPassword === '') {
+        if ($email === '' || $password === '' || $confirmPassword === '') {
             $signupMessageType = 'error';
             $signupMessage = 'All fields are required.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -69,45 +74,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $signupMessageType = 'error';
             $signupMessage = 'Passwords do not match.';
         } else {
-            $checkSql = 'SELECT employee_number, email FROM users WHERE employee_number = ? OR email = ? LIMIT 1';
-            $checkStmt = mysqli_prepare($connection, $checkSql);
+          $checkSql = 'SELECT email FROM users WHERE email = ? LIMIT 1';
+          $checkStmt = mysqli_prepare($connection, $checkSql);
 
             if (!$checkStmt) {
                 $signupMessageType = 'error';
                 $signupMessage = 'Database error. Please try again later.';
             } else {
-                mysqli_stmt_bind_param($checkStmt, 'ss', $employeeNumber, $email);
+                mysqli_stmt_bind_param($checkStmt, 's', $email);
                 mysqli_stmt_execute($checkStmt);
                 $result = mysqli_stmt_get_result($checkStmt);
 
                 if ($existing = mysqli_fetch_assoc($result)) {
-                    $signupMessageType = 'error';
-                    if ($existing['employee_number'] === $employeeNumber) {
-                        $signupMessage = 'Employee number already exists.';
-                    } else {
-                        $signupMessage = 'Email address already exists.';
-                    }
+                  $signupMessageType = 'error';
+                  $signupMessage = 'Email address already exists.';
                 } else {
-                    $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                    $passwordHash = md5($password);
-                    $_SESSION['pending_signup'] = [
-                        'employeeNumber' => $employeeNumber,
+                  // ensure pending_registrations table exists and check for duplicate pending
+                  $pendingCreate = "CREATE TABLE IF NOT EXISTS pending_registrations (
+                    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    email VARCHAR(100) NOT NULL UNIQUE,
+                    password VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+                  mysqli_query($connection, $pendingCreate);
+
+                  $pcheck = mysqli_prepare($connection, 'SELECT id FROM pending_registrations WHERE email = ? LIMIT 1');
+                  if ($pcheck) {
+                    mysqli_stmt_bind_param($pcheck, 's', $email);
+                    mysqli_stmt_execute($pcheck);
+                    $pres = mysqli_stmt_get_result($pcheck);
+                    if ($prow = mysqli_fetch_assoc($pres)) {
+                      $signupMessageType = 'error';
+                      $signupMessage = 'A registration for this email is already pending.';
+                      mysqli_stmt_close($pcheck);
+                    } else {
+                      mysqli_stmt_close($pcheck);
+                      $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                      $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+                      $_SESSION['pending_signup'] = [
                         'email' => $email,
                         'passwordHash' => $passwordHash,
                         'otp' => $otp,
                         'otp_expires' => time() + 300,
-                    ];
+                      ];
 
-                    if (sendVerificationEmail($email, $otp)) {
+                      if (sendVerificationEmail($email, $otp)) {
                         $signupStage = 'otp';
                         $activeTab = 'signup';
                         $signupMessageType = 'success';
                         $signupMessage = 'A 6-digit verification code has been sent to your email.';
-                    } else {
+                      } else {
                         unset($_SESSION['pending_signup']);
                         $signupMessageType = 'error';
                         $signupMessage = 'Unable to send verification email. Please try again later.';
+                      }
                     }
+                  } else {
+                    $signupMessageType = 'error';
+                    $signupMessage = 'Database error. Please try again later.';
+                  }
                 }
                 mysqli_stmt_close($checkStmt);
             }
@@ -123,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $signupStage = 'form';
         } else {
             $pending = $_SESSION['pending_signup'];
-            $signupValues['employeeNumber'] = htmlspecialchars($pending['employeeNumber']);
             $signupValues['email'] = htmlspecialchars($pending['email']);
 
             $otpCode = trim($_POST['otp_code'] ?? '');
@@ -141,24 +165,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $connection = null;
                 include '../../database/connection.php';
 
-                $sql = "INSERT INTO users (employee_number, email, password, role) VALUES (?, ?, ?, 'employee')";
+                // ensure pending_registrations table exists
+                $pendingSql = "CREATE TABLE IF NOT EXISTS pending_registrations (
+                  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                  email VARCHAR(100) NOT NULL UNIQUE,
+                  password VARCHAR(255) NOT NULL,
+                  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+                mysqli_query($connection, $pendingSql);
+
+                $sql = "INSERT INTO pending_registrations (email, password) VALUES (?, ?)";
                 $stmt = mysqli_prepare($connection, $sql);
                 if ($stmt) {
-                    mysqli_stmt_bind_param($stmt, 'sss', $pending['employeeNumber'], $pending['email'], $pending['passwordHash']);
-                    if (mysqli_stmt_execute($stmt)) {
-                      unset($_SESSION['pending_signup']);
-                      mysqli_stmt_close($stmt);
-                      mysqli_close($connection);
-                      header('Location: ' . $_SERVER['PHP_SELF'] . '?registered=1');
-                      exit;
-                    } else {
-                        $signupMessageType = 'error';
-                        $signupMessage = 'Unable to complete registration. Please try again.';
-                    }
+                  mysqli_stmt_bind_param($stmt, 'ss', $pending['email'], $pending['passwordHash']);
+                  if (mysqli_stmt_execute($stmt)) {
+                    unset($_SESSION['pending_signup']);
                     mysqli_stmt_close($stmt);
-                } else {
+                    mysqli_close($connection);
+                    header('Location: ' . $_SERVER['PHP_SELF'] . '?pending=1');
+                    exit;
+                  } else {
                     $signupMessageType = 'error';
-                    $signupMessage = 'Database error. Please try again later.';
+                    $signupMessage = 'Unable to submit registration. Please try again.';
+                  }
+                  mysqli_stmt_close($stmt);
+                } else {
+                  $signupMessageType = 'error';
+                  $signupMessage = 'Database error. Please try again later.';
                 }
                 mysqli_close($connection);
             }
@@ -175,7 +208,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pending = &$_SESSION['pending_signup'];
             $pending['otp'] = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             $pending['otp_expires'] = time() + 300;
-            $signupValues['employeeNumber'] = htmlspecialchars($pending['employeeNumber']);
             $signupValues['email'] = htmlspecialchars($pending['email']);
 
             if (sendVerificationEmail($pending['email'], $pending['otp'])) {
@@ -192,9 +224,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_SESSION['pending_signup']) && $signupStage === 'form') {
     $signupStage = 'otp';
     $activeTab = 'signup';
-    $pending = $_SESSION['pending_signup'];
-    $signupValues['employeeNumber'] = htmlspecialchars($pending['employeeNumber']);
-    $signupValues['email'] = htmlspecialchars($pending['email']);
+            $pending = &$_SESSION['pending_signup'];
+            $pending['otp'] = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $pending['otp_expires'] = time() + 300;
+            $signupValues['email'] = htmlspecialchars($pending['email']);
 }
 ?>
 <!DOCTYPE html>
@@ -299,10 +332,6 @@ if (isset($_SESSION['pending_signup']) && $signupStage === 'form') {
 
         <?php if ($signupStage === 'form'): ?>
           <form method="POST" id="signupForm">
-            <div class="input-box">
-              <label>Employee Number</label>
-              <input type="text" name="employeeNumber" value="<?php echo $signupValues['employeeNumber']; ?>" required>
-            </div>
 
             <div class="input-box">
               <label>Email</label>
@@ -327,15 +356,10 @@ if (isset($_SESSION['pending_signup']) && $signupStage === 'form') {
           </div>
         <?php else: ?>
           <form method="POST" id="otpForm">
-            <div class="input-box">
-              <label>Employee Number</label>
-              <input type="text" value="<?php echo $signupValues['employeeNumber']; ?>" readonly>
-            </div>
-
-            <div class="input-box">
-              <label>Email</label>
-              <input type="email" value="<?php echo $signupValues['email']; ?>" readonly>
-            </div>
+              <div class="input-box">
+                <label>Email</label>
+                <input type="email" value="<?php echo $signupValues['email']; ?>" readonly>
+              </div>
 
             <div class="input-box">
               <label>Verification Code</label>
@@ -430,6 +454,7 @@ if (isset($_SESSION['pending_signup']) && $signupStage === 'form') {
 
     const registrationCompleted = <?php echo json_encode($registrationCompleted); ?>;
     const resetCompleted = <?php echo json_encode($resetCompleted); ?>;
+    const registrationPending = <?php echo json_encode($registrationPending); ?>;
     function showTopLeftToast(message, duration = 3000) {
       let container = document.getElementById('topRightToastContainer');
       if (!container) {
@@ -477,6 +502,11 @@ if (isset($_SESSION['pending_signup']) && $signupStage === 'form') {
       showLogin();
       showTopLeftToast('Registration complete. Redirecting to login...', 3000);
       setTimeout(() => { window.location.href = window.location.pathname; }, 3000);
+    }
+
+    if (registrationPending) {
+      showLogin();
+      showTopLeftToast('Thank you for registering. Please check your email or contact HR to confirm your registration.', 4500);
     }
 
     if (resetCompleted) {
