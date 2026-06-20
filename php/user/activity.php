@@ -1207,6 +1207,4 @@ document.querySelectorAll('.tracker-btn.upload-btn').forEach(btn => {
     }
 </script>
 
-</body>
-</html>
-
+<?php include __DIR__ . '/logout_confirm.php'; ?>

@@ -2079,6 +2079,7 @@ $medical_status = 'missing';
 
     })
   </script>
+  <?php include __DIR__ . '/logout_confirm.php'; ?>
 </body>
 
 </html>

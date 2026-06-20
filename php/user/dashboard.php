@@ -639,6 +639,7 @@ $stmt_unread->close();
   </div>
 
   <script src="../../js/user/dashboard.js"></script>
+  <?php include __DIR__ . '/logout_confirm.php'; ?>
 </body>
 
 </html>

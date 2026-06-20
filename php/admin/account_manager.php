@@ -143,11 +143,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
 
-                // insert into users
+                // insert into users and employees together
+                mysqli_begin_transaction($connection);
                 $ins = mysqli_prepare($connection, "INSERT INTO users (employee_number, email, password, role, status) VALUES (?, ?, ?, 'employee', 'active')");
                 if ($ins) {
                     mysqli_stmt_bind_param($ins, 'sss', $empNumber, $email, $passwordHash);
                     if (mysqli_stmt_execute($ins)) {
+                        mysqli_stmt_close($ins);
+
+                        $empFullName = explode('@', $email)[0];
+                        $empEmployeeType = 'TP';
+                        $empDepartment = 'TBD';
+                        $empPosition = 'Employee';
+                        $empCredentials = '';
+                        $empGender = null;
+                        $empAddress = null;
+                        $empPhone = null;
+                        $empStatus = 'Active';
+                        $empEducationalAttainment = 'N/A';
+                        $empSchool = 'N/A';
+                        $empDateHired = date('Y-m-d');
+                        $empType = 'employee';
+                        $empYearsService = 0;
+                        $empEmploymentStatus = 'Active';
+                        $empLeaveBalance = '0';
+
+                        $employeeSql = "INSERT INTO employees (
+                            employee_number,
+                            full_name,
+                            employee_type,
+                            department,
+                            position,
+                            credentials,
+                            gender,
+                            address,
+                            phone,
+                            email,
+                            status,
+                            educational_attainment,
+                            school,
+                            created_at,
+                            date_hired,
+                            type,
+                            years_service,
+                            employment_status,
+                            leave_balance
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)";
+
+                        $empStmt = mysqli_prepare($connection, $employeeSql);
+                        if ($empStmt) {
+                            mysqli_stmt_bind_param(
+                                $empStmt,
+                                'sssssssssssssssiss',
+                                $empNumber,
+                                $empFullName,
+                                $empEmployeeType,
+                                $empDepartment,
+                                $empPosition,
+                                $empCredentials,
+                                $empGender,
+                                $empAddress,
+                                $empPhone,
+                                $email,
+                                $empStatus,
+                                $empEducationalAttainment,
+                                $empSchool,
+                                $empDateHired,
+                                $empType,
+                                $empYearsService,
+                                $empEmploymentStatus,
+                                $empLeaveBalance
+                            );
+
+                            if (!mysqli_stmt_execute($empStmt)) {
+                                mysqli_stmt_close($empStmt);
+                                mysqli_rollback($connection);
+                                $_SESSION['flash_message'] = 'Approved user created, but employee record failed: ' . mysqli_error($connection);
+                                $_SESSION['flash_type'] = 'error';
+                                header('Location: ' . $_SERVER['PHP_SELF']);
+                                exit;
+                            }
+                            mysqli_stmt_close($empStmt);
+                        } else {
+                            mysqli_rollback($connection);
+                            $_SESSION['flash_message'] = 'Unable to prepare employee record.';
+                            $_SESSION['flash_type'] = 'error';
+                            header('Location: ' . $_SERVER['PHP_SELF']);
+                            exit;
+                        }
+
                         // remove pending registration
                         $del = mysqli_prepare($connection, 'DELETE FROM pending_registrations WHERE id = ?');
                         if ($del) {
@@ -155,6 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             mysqli_stmt_execute($del);
                             mysqli_stmt_close($del);
                         }
+
+                        mysqli_commit($connection);
 
                         // Send notification email with employee id
                         $emailSent = false;
@@ -190,13 +276,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header('Location: ' . $_SERVER['PHP_SELF']);
                         exit;
                     } else {
+                        mysqli_stmt_close($ins);
+                        mysqli_rollback($connection);
                         $_SESSION['flash_message'] = 'Unable to create user account.';
                         $_SESSION['flash_type'] = 'error';
                         header('Location: ' . $_SERVER['PHP_SELF']);
                         exit;
                     }
-                    mysqli_stmt_close($ins);
                 } else {
+                    mysqli_rollback($connection);
                     $_SESSION['flash_message'] = 'Database error. Please try again later.';
                     $_SESSION['flash_type'] = 'error';
                     header('Location: ' . $_SERVER['PHP_SELF']);
@@ -302,6 +390,12 @@ if ($pr) {
 
         .deny-btn { padding: 8px 12px; border-radius: 8px; background: #e74c3c; color: #fff; border: none; cursor: pointer; font-weight: 600; }
         .deny-btn:hover { background: #c0392b; }
+
+        .view-btn.loading,
+        .deny-btn.loading {
+            opacity: 0.75;
+            cursor: wait;
+        }
 
         /* Ensure action buttons don't stretch */
         .action-buttons button { display: inline-block; }
@@ -625,6 +719,19 @@ if ($pr) {
         if (openPendingBtn && pendingModal) openPendingBtn.addEventListener('click', ()=>{ pendingModal.style.display='flex'; });
         if (closePending && pendingModal) closePending.addEventListener('click', ()=>{ pendingModal.style.display='none'; });
         if (pendingModal) pendingModal.addEventListener('click', (e)=>{ if (e.target === pendingModal) pendingModal.style.display='none'; });
+
+        // Show loading state when approve/reject is clicked
+        const pendingFormButtons = document.querySelectorAll('#pendingModal form button[type="submit"]');
+        pendingFormButtons.forEach((btn) => {
+            const form = btn.closest('form');
+            if (!form) return;
+            form.addEventListener('submit', () => {
+                btn.dataset.originalText = btn.textContent;
+                btn.textContent = 'Processing...';
+                btn.disabled = true;
+                btn.classList.add('loading');
+            });
+        });
     </script>
 </body>
 </html>

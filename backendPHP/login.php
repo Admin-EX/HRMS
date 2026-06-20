@@ -30,7 +30,17 @@ if ($user = mysqli_fetch_assoc($result)) {
         exit;
     }
 
-    if (md5($password) === $user['password']) {
+    $storedPassword = $user['password'] ?? '';
+    $isPasswordValid = false;
+
+    // Support modern password_hash() entries, with fallback for legacy MD5 passwords.
+    if ($storedPassword !== '' && password_verify($password, $storedPassword)) {
+        $isPasswordValid = true;
+    } elseif (md5($password) === $storedPassword) {
+        $isPasswordValid = true;
+    }
+
+    if ($isPasswordValid) {
         $role = strtolower(trim($user['role'] ?? 'employee'));
         $_SESSION['role'] = $role;
         $_SESSION['loggedUser'] = $employeeNumber;

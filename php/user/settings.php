@@ -896,6 +896,7 @@ $stmt_unread->close();
       });
     });
   </script>
+  <?php include __DIR__ . '/logout_confirm.php'; ?>
 </body>
 
 </html>
