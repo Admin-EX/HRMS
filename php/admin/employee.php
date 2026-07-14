@@ -26,11 +26,21 @@ error_reporting(0);
     <div id="addEmployeeModal" class="modal">
         <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <h2><i class="fas fa-user-plus"></i> Add New Employee</h2>
+                <h2><i class="fas fa-user-edit"></i> Edit Employee Details</h2>
                 <span class="close" id="closeAddEmployeeModal">&times;</span>
             </div>
             <div class="modal-body">
                 <form id="addEmployeeForm">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="employeeSelect">Select Employee to Edit *</label>
+                        <select id="employeeSelect" name="employeeSelect" required>
+                            <option value="">Choose employee</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" id="employee_id" name="employee_id">
+                    <input type="hidden" id="original_employee_number" name="original_employee_number">
+
                     <div class="form-grid">
                         <!-- Basic Information -->
                         <div class="form-section">
@@ -170,7 +180,7 @@ error_reporting(0);
                     <div class="modal-footer">
                         <button type="button" class="btn-secondary" id="closeAddEmployeeModalBtn">Cancel</button>
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Create Employee
+                            <i class="fas fa-save"></i> Save Changes
                         </button>
                     </div>
                 </form>
@@ -386,7 +396,7 @@ error_reporting(0);
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-left: 20px;">
                 <button id="addEmployeeBtn" class="add-employee-btn">
-                    <i class="fas fa-plus"></i> Add Employee
+                    <i class="fas fa-edit"></i> Edit Employee
                 </button>
             </div>
             <!-- EMPLOYEE TABLE -->
@@ -512,6 +522,14 @@ error_reporting(0);
         <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
         <pre id="errorModalMessage"></pre>
         <button id="errorModalOk">OK</button>
+    </div>
+</div>
+
+<div id="successModal" class="success-modal">
+    <div class="success-modal-content">
+        <h3><i class="fas fa-check-circle"></i> Success</h3>
+        <p id="successModalMessage">Saved successfully.</p>
+        <button id="successModalOk">OK</button>
     </div>
 </div>
 

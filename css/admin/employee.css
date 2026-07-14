@@ -1326,6 +1326,52 @@
     background: #c0392b;
 }
 
+.success-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.success-modal-content {
+    background: #fff;
+    width: 420px;
+    max-width: 90%;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    animation: pop 0.2s ease-out;
+    text-align: center;
+}
+
+.success-modal-content h3 {
+    margin: 0 0 12px;
+    color: #2e7d32;
+    font-size: 18px;
+}
+
+.success-modal-content p {
+    margin: 0 0 16px;
+    color: #444;
+    font-size: 14px;
+}
+
+.success-modal-content button {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.success-modal-content button:hover {
+    background: #1b5e20;
+}
+
 @keyframes pop {
     from { transform: scale(0.9); opacity: 0; }
     to   { transform: scale(1); opacity: 1; }

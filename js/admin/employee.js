@@ -37,6 +37,8 @@ const closeCredentialModal = document.getElementById('closeCredentialModal');
 // DOM elements - Forms & Buttons
 const addEmployeeBtn = document.getElementById('addEmployeeBtn');
 const addEmployeeForm = document.getElementById('addEmployeeForm');
+const employeeSelect = document.getElementById('employeeSelect');
+let currentSubmitButton = null;
 
 // ============================================================================
 // INITIALIZATION
@@ -68,6 +70,7 @@ function loadEmployees() {
         })
         .then(data => {
             employees = data;
+            populateEmployeeSelect();
             renderTable();
             updateCredentialCounts();
             updateStats();
@@ -513,61 +516,100 @@ function updateStatElement(elementId, value) {
 }
 
 // ============================================================================
-// ADD EMPLOYEE FUNCTIONS
+// EDIT EMPLOYEE FUNCTIONS
 // ============================================================================
 
+function populateEmployeeSelect() {
+    if (!employeeSelect) return;
+
+    const selectedValue = employeeSelect.value;
+    employeeSelect.innerHTML = '<option value="">Choose employee</option>';
+
+    employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.id;
+        option.textContent = `${emp.name} (${emp.id})`;
+        employeeSelect.appendChild(option);
+    });
+
+    if (selectedValue) {
+        employeeSelect.value = selectedValue;
+    }
+}
+
+function fillEditForm(employee) {
+    if (!employee) return;
+
+    document.getElementById('employee_id').value = employee.db_id || '';
+    document.getElementById('original_employee_number').value = employee.id || '';
+    document.getElementById('employee_number').value = employee.id || '';
+    document.getElementById('full_name').value = employee.name || '';
+    document.getElementById('employee_type').value = employee.type || '';
+    document.getElementById('department').value = employee.department || '';
+    document.getElementById('position').value = employee.position || '';
+    document.getElementById('credentials').value = employee.credentials || '';
+    document.getElementById('gender').value = employee.gender || '';
+    document.getElementById('address').value = employee.address || '';
+    document.getElementById('phone').value = employee.phone || '';
+    document.getElementById('email').value = employee.email || '';
+    document.getElementById('status').value = employee.status || 'Active';
+    document.getElementById('educational_attainment').value = employee.educational_attainment || '';
+    document.getElementById('school').value = employee.school || '';
+    document.getElementById('date_hired').value = employee.date_hired || '';
+    document.getElementById('employment_status').value = employee.employment_status || '';
+}
+
 /**
- * Handle add employee form submission
+ * Handle edit employee form submission
  */
-function handleAddEmployee(e) {
+function handleEditEmployee(e) {
     e.preventDefault();
 
-    // Get form data
+    if (!employeeSelect || !employeeSelect.value) {
+        showErrorModal('Please select an employee to edit.');
+        return;
+    }
+
     const formData = new FormData(addEmployeeForm);
 
-    // Show loading state
     const submitBtn = addEmployeeForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    currentSubmitButton = submitBtn;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     submitBtn.disabled = true;
 
-fetch('../../backendPHP/create_employee.php', {
-    method: 'POST',
-    body: formData
-})
-.then(response => response.text())
-.then(text => {
-    // Try to parse JSON first
-    try {
-        const data = JSON.parse(text);
+    fetch('../../backendPHP/update_employee.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
 
-        if (data.success) {
-            addEmployeeModalEl.style.display = 'none';
-            showCredentialModal(
-                data.employee_id,
-                data.employee_number,
-                data.password,
-                data.full_name
-            );
-            loadEmployees();
-            addEmployeeForm.reset();
-        } else {
-            showErrorModal(data.message || 'Unknown error');
+            if (data.success) {
+                addEmployeeModalEl.style.display = 'none';
+                loadEmployees();
+                addEmployeeForm.reset();
+                if (employeeSelect) {
+                    employeeSelect.value = '';
+                }
+                showSuccessModal(data.message || 'Employee updated successfully');
+            } else {
+                showErrorModal(data.message || 'Unknown error');
+            }
+        } catch (e) {
+            showErrorModal(text);
         }
-    } catch (e) {
-        // Not JSON → PHP/HTML error
-        showErrorModal(text);
-    }
-})
-.catch(error => {
-    showErrorModal(error.message);
-})
-.finally(() => {
-    // safety fallback
-    submitBtn.innerHTML = 'Create Employee';
-    submitBtn.disabled = false;
-});
-
+    })
+    .catch(error => {
+        showErrorModal(error.message);
+    })
+    .finally(() => {
+        if (currentSubmitButton) {
+            currentSubmitButton.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            currentSubmitButton.disabled = false;
+        }
+    });
 }
 
 // ============================================================================
@@ -859,11 +901,23 @@ function setupEventListeners() {
 
     
 
-    // Add Employee Modal
+    // Edit Employee Modal
     if (addEmployeeBtn) {
         addEmployeeBtn.addEventListener('click', () => {
             addEmployeeModalEl.style.display = 'flex';
             addEmployeeForm.reset();
+            if (employeeSelect) {
+                employeeSelect.value = '';
+            }
+        });
+    }
+
+    if (employeeSelect) {
+        employeeSelect.addEventListener('change', function () {
+            const selectedEmployee = employees.find(emp => emp.id === this.value);
+            if (selectedEmployee) {
+                fillEditForm(selectedEmployee);
+            }
         });
     }
 
@@ -970,9 +1024,9 @@ function setupEventListeners() {
         });
     }
 
-    // Add Employee Form submission
+    // Edit Employee Form submission
     if (addEmployeeForm) {
-        addEmployeeForm.addEventListener('submit', handleAddEmployee);
+        addEmployeeForm.addEventListener('submit', handleEditEmployee);
     }
 
     // Print and Download Credential buttons
@@ -996,18 +1050,37 @@ function setupEventListeners() {
 const errorModal = document.getElementById('errorModal');
 const errorModalMessage = document.getElementById('errorModalMessage');
 const errorModalOk = document.getElementById('errorModalOk');
+const successModal = document.getElementById('successModal');
+const successModalMessage = document.getElementById('successModalMessage');
+const successModalOk = document.getElementById('successModalOk');
 
 function showErrorModal(message) {
     errorModalMessage.textContent = message;
     errorModal.style.display = 'flex';
 }
 
+function showSuccessModal(message) {
+    successModalMessage.textContent = message;
+    successModal.style.display = 'flex';
+}
+
 errorModalOk.addEventListener('click', () => {
     errorModal.style.display = 'none';
 
-    // Restore submit button
-    submitBtn.innerHTML = 'Create Employee';
-    submitBtn.disabled = false;
+    if (currentSubmitButton) {
+        currentSubmitButton.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        currentSubmitButton.disabled = false;
+    }
+});
+
+successModalOk.addEventListener('click', () => {
+    successModal.style.display = 'none';
+});
+
+successModal.addEventListener('click', (e) => {
+    if (e.target === successModal) {
+        successModal.style.display = 'none';
+    }
 });
 
             // Notification dropdown

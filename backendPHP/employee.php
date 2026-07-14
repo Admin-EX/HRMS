@@ -1,9 +1,11 @@
 <?php
-include "../database/connection.php";
+include __DIR__ . '/../database/connection.php';
 header('Content-Type: application/json');
 
 $sql = "SELECT 
+    id AS db_id,
     employee_number AS id,
+    employee_number,
     full_name AS name,
     employee_type AS type,
     department,
@@ -14,7 +16,10 @@ $sql = "SELECT
     phone,
     email,
     status,
-    employment_status
+    employment_status,
+    educational_attainment,
+    school,
+    date_hired
 FROM employees";
 
 $result = mysqli_query($connection, $sql);
